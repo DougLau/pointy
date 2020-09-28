@@ -218,29 +218,6 @@ where
     b + (a - b) * t
 }
 
-/// Calculate intersection point of two lines.
-///
-/// * `a0` First point on line a.
-/// * `a1` Second point on line a.
-/// * `b0` First point on line b.
-/// * `b1` Second point on line b.
-///
-/// Returns None if the lines are colinear.
-pub fn intersection(a0: Pt, a1: Pt, b0: Pt, b1: Pt) -> Option<Pt> {
-    let av = a0 - a1;
-    let bv = b0 - b1;
-    let den = av * bv;
-    if den != 0.0 {
-        let ca = a0 * a1;
-        let cb = b0 * b1;
-        let xn = bv.x() * ca - av.x() * cb;
-        let yn = bv.y() * ca - av.y() * cb;
-        Some(Pt(xn / den, yn / den))
-    } else {
-        None
-    }
-}
-
 macro_rules! define_xform {
     ($xty:ty, $ptty:ty, $ptexp:expr, $fty:ty) => {
         impl MulAssign for $xty {
