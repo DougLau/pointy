@@ -2,7 +2,7 @@
 //
 // Copyright (c) 2020  Douglas P Lau
 //
-//! Pointy is a minimal 2D graphics library.
+//! Pointy is a minimal 2D geometry library.
 #![warn(missing_docs)]
 #![warn(missing_doc_code_examples)]
 
