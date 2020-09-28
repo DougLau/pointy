@@ -1,0 +1,13 @@
+[package]
+name = "pointy"
+version = "0.1.0"
+authors = ["Doug Lau <doug.p.lau@gmail.com>"]
+description = "A minimal 2D geometry library"
+license = "MIT/Apache-2.0"
+documentation = "https://docs.rs/pointy"
+homepage = "https://github.com/DougLau/pointy"
+repository = "https://github.com/DougLau/pointy"
+readme = "README.md"
+edition = "2018"
+
+[dependencies]
