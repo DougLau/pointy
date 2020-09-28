@@ -24,10 +24,12 @@ pub struct Pt(pub f32, pub f32);
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct PtB(pub f64, pub f64);
 
-/// An affine transform for `Pt` values.
+/// An affine transform for [Pt] values.
 ///
 /// A series of translate, rotate, scale or skew transforms can be combined
 /// into a single `Transform`.
+///
+/// [Pt]: struct.Pt.html
 ///
 /// # Example
 /// ```
@@ -45,10 +47,12 @@ pub struct Transform {
     e: [f32; 6],
 }
 
-/// An affine transform for `PtB` values.
+/// An affine transform for [PtB] values.
 ///
 /// A series of translate, rotate, scale or skew transforms can be combined
 /// into a single `TransformB`.
+///
+/// [PtB]: struct.PtB.html
 ///
 /// # Example
 /// ```
@@ -128,7 +132,7 @@ macro_rules! define_pt {
                 self.1
             }
 
-            /// Get the magnitude of a vector
+            /// Get the magnitude (length) of a vector
             pub fn mag(self) -> $fty {
                 self.x().hypot(self.y())
             }
