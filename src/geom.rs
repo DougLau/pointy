@@ -26,8 +26,8 @@ pub struct PtB(pub f64, pub f64);
 
 /// An affine transform for [Pt] values.
 ///
-/// A series of translate, rotate, scale or skew transforms can be combined
-/// into a single `Transform`.
+/// A series of translate, rotate, scale and skew transformations can be
+/// combined into a single `Transform`.
 ///
 /// [Pt]: struct.Pt.html
 ///
@@ -49,8 +49,8 @@ pub struct Transform {
 
 /// An affine transform for [PtB] values.
 ///
-/// A series of translate, rotate, scale or skew transforms can be combined
-/// into a single `TransformB`.
+/// A series of translate, rotate, scale and skew transformations can be
+/// combined into a single `TransformB`.
 ///
 /// [PtB]: struct.PtB.html
 ///
