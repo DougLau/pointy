@@ -1,6 +1,6 @@
 # pointy
 
-A minimal 2D graphics library in Rust.
+A minimal 2D geometry library in Rust.
 
 See the [documentation] for examples and API usage.
 
