@@ -2,10 +2,9 @@
 //
 // Copyright (c) 2020  Douglas P Lau
 //
-use std::f32;
 use std::ops::{Add, Div, Mul, MulAssign, Neg, Sub};
 
-/// 2-dimensional vector / point.
+/// 2-dimensional vector / point with `f32` values.
 ///
 /// ```rust
 /// use pointy::Pt;
@@ -15,17 +14,27 @@ use std::ops::{Add, Div, Mul, MulAssign, Neg, Sub};
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Pt(pub f32, pub f32);
 
-/// An affine transform can translate, scale, rotate and skew 2D points.
+/// 2-dimensional vector / point with `f64` values.
 ///
-/// A series of transforms can be combined into a single `Transform`.
+/// ```rust
+/// use pointy::PtB;
+///
+/// let pt = PtB(10.0, 15.0);
+/// ```
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct PtB(pub f64, pub f64);
+
+/// An affine transform for `Pt` values.
+///
+/// A series of translate, rotate, scale or skew transforms can be combined
+/// into a single `Transform`.
 ///
 /// # Example
 /// ```
 /// use pointy::Transform;
 ///
-/// const PI: f32 = std::f32::consts::PI;
 /// let t = Transform::with_translate(-50.0, -50.0)
-///     .rotate(PI)
+///     .rotate(std::f32::consts::PI)
 ///     .translate(50.0, 50.0)
 ///     .scale(2.0, 2.0);
 /// ```
@@ -35,139 +44,171 @@ pub struct Transform {
     e: [f32; 6],
 }
 
-impl Add for Pt {
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self {
-        Pt(self.x() + rhs.x(), self.y() + rhs.y())
-    }
+/// An affine transform for `PtB` values.
+///
+/// A series of translate, rotate, scale or skew transforms can be combined
+/// into a single `TransformB`.
+///
+/// # Example
+/// ```
+/// use pointy::TransformB;
+///
+/// let t = TransformB::with_translate(-50.0, -50.0)
+///     .rotate(std::f64::consts::PI)
+///     .translate(50.0, 50.0)
+///     .scale(2.0, 2.0);
+/// ```
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct TransformB {
+    /// First six values in 3x3 matrix (last row assumed to be 0 0 1)
+    e: [f64; 6],
 }
 
-impl Sub for Pt {
-    type Output = Self;
+macro_rules! define_pt {
+    ($ptty:ty, $fty:ty, $pi:expr) => {
+        impl Add for $ptty {
+            type Output = Self;
 
-    fn sub(self, rhs: Self) -> Self {
-        Pt(self.x() - rhs.x(), self.y() - rhs.y())
-    }
-}
+            fn add(self, rhs: Self) -> Self {
+                Self(self.x() + rhs.x(), self.y() + rhs.y())
+            }
+        }
 
-impl Mul<f32> for Pt {
-    type Output = Self;
+        impl Sub for $ptty {
+            type Output = Self;
 
-    fn mul(self, s: f32) -> Self {
-        Pt(self.x() * s, self.y() * s)
-    }
-}
+            fn sub(self, rhs: Self) -> Self {
+                Self(self.x() - rhs.x(), self.y() - rhs.y())
+            }
+        }
 
-impl Mul for Pt {
-    type Output = f32;
+        impl Mul<$fty> for $ptty {
+            type Output = Self;
 
-    /// Calculate the cross product of two vectors
-    fn mul(self, rhs: Self) -> f32 {
-        self.x() * rhs.y() - self.y() * rhs.x()
-    }
-}
+            fn mul(self, s: $fty) -> Self {
+                Self(self.x() * s, self.y() * s)
+            }
+        }
 
-impl Div<f32> for Pt {
-    type Output = Self;
+        impl Mul for $ptty {
+            type Output = $fty;
 
-    fn div(self, s: f32) -> Self {
-        Pt(self.x() / s, self.y() / s)
-    }
-}
+            /// Calculate the cross product of two vectors
+            fn mul(self, rhs: Self) -> $fty {
+                self.x() * rhs.y() - self.y() * rhs.x()
+            }
+        }
 
-impl Neg for Pt {
-    type Output = Self;
+        impl Div<$fty> for $ptty {
+            type Output = Self;
 
-    fn neg(self) -> Self {
-        Pt(-self.x(), -self.y())
-    }
-}
+            fn div(self, s: $fty) -> Self {
+                Self(self.x() / s, self.y() / s)
+            }
+        }
 
-impl Pt {
-    /// Get the X value
-    pub fn x(self) -> f32 {
-        self.0
-    }
+        impl Neg for $ptty {
+            type Output = Self;
 
-    /// Get the Y value
-    pub fn y(self) -> f32 {
-        self.1
-    }
+            fn neg(self) -> Self {
+                Self(-self.x(), -self.y())
+            }
+        }
 
-    /// Get the magnitude of a vector
-    pub fn mag(self) -> f32 {
-        self.x().hypot(self.y())
-    }
+        impl $ptty {
+            /// Get the X value
+            pub const fn x(self) -> $fty {
+                self.0
+            }
 
-    /// Create a copy normalized to unit length
-    pub fn normalize(self) -> Self {
-        let m = self.mag();
-        if m > 0.0 {
-            self / m
-        } else {
-            Pt::default()
+            /// Get the Y value
+            pub const fn y(self) -> $fty {
+                self.1
+            }
+
+            /// Get the magnitude of a vector
+            pub fn mag(self) -> $fty {
+                self.x().hypot(self.y())
+            }
+
+            /// Create a copy normalized to unit length
+            pub fn normalize(self) -> Self {
+                let m = self.mag();
+                if m > 0.0 {
+                    self / m
+                } else {
+                    Self::default()
+                }
+            }
+
+            /// Calculate the distance squared between two points
+            pub fn dist_sq(self, rhs: Self) -> $fty {
+                let dx = self.x() - rhs.x();
+                let dy = self.y() - rhs.y();
+                dx * dx + dy * dy
+            }
+
+            /// Calculate the distance between two points
+            pub fn dist(self, rhs: Self) -> $fty {
+                self.dist_sq(rhs).sqrt()
+            }
+
+            /// Get the midpoint of two points
+            pub fn midpoint(self, rhs: Self) -> Self {
+                let x = (self.x() + rhs.x()) / 2.0;
+                let y = (self.y() + rhs.y()) / 2.0;
+                Self(x, y)
+            }
+
+            /// Create a left-hand perpendicular vector
+            pub fn left(self) -> Self {
+                Self(-self.y(), self.x())
+            }
+
+            /// Create a right-hand perpendicular vector
+            pub fn right(self) -> Self {
+                Self(self.y(), -self.x())
+            }
+
+            /// Calculate linear interpolation of two points.
+            ///
+            /// * `t` Interpolation amount, from 0 to 1
+            pub fn lerp(self, rhs: Self, t: $fty) -> Self {
+                let x = float_lerp(self.x(), rhs.x(), t);
+                let y = float_lerp(self.y(), rhs.y(), t);
+                Self(x, y)
+            }
+
+            /// Calculate the relative angle to another vector / point.
+            ///
+            /// The result will be between `-PI` and `+PI`.
+            pub fn angle_rel(self, rhs: Self) -> $fty {
+                let th = self.y().atan2(self.x()) - rhs.y().atan2(rhs.x());
+                if th < -$pi {
+                    th + 2.0 * $pi
+                } else if th > $pi {
+                    th - 2.0 * $pi
+                } else {
+                    th
+                }
+            }
         }
     }
-
-    /// Calculate the distance squared between two points
-    pub fn dist_sq(self, rhs: Self) -> f32 {
-        let dx = self.x() - rhs.x();
-        let dy = self.y() - rhs.y();
-        dx * dx + dy * dy
-    }
-
-    /// Calculate the distance between two points
-    pub fn dist(self, rhs: Self) -> f32 {
-        self.dist_sq(rhs).sqrt()
-    }
-
-    /// Get the midpoint of two points
-    pub fn midpoint(self, rhs: Self) -> Self {
-        let x = (self.x() + rhs.x()) / 2.0;
-        let y = (self.y() + rhs.y()) / 2.0;
-        Pt(x, y)
-    }
-
-    /// Create a left-hand perpendicular vector
-    pub fn left(self) -> Self {
-        Pt(-self.y(), self.x())
-    }
-
-    /// Create a right-hand perpendicular vector
-    pub fn right(self) -> Self {
-        Pt(self.y(), -self.x())
-    }
-
-    /// Calculate linear interpolation of two points.
-    ///
-    /// * `t` Interpolation amount, from 0 to 1
-    pub fn lerp(self, rhs: Self, t: f32) -> Self {
-        let x = float_lerp(self.x(), rhs.x(), t);
-        let y = float_lerp(self.y(), rhs.y(), t);
-        Pt(x, y)
-    }
-
-    /// Calculate the relative angle to another vector / point.
-    ///
-    /// The result will be between `-PI` and `+PI`.
-    pub fn angle_rel(self, rhs: Self) -> f32 {
-        const PI: f32 = f32::consts::PI;
-        let th = self.y().atan2(self.x()) - rhs.y().atan2(rhs.x());
-        if th < -PI {
-            th + 2.0 * PI
-        } else if th > PI {
-            th - 2.0 * PI
-        } else {
-            th
-        }
-    }
 }
+
+define_pt!(Pt, f32, std::f32::consts::PI);
+define_pt!(PtB, f64, std::f64::consts::PI);
 
 /// Calculate linear interpolation of two values
 ///
 /// The t value should be between 0 and 1.
-fn float_lerp(a: f32, b: f32, t: f32) -> f32 {
+fn float_lerp<T>(a: T, b: T, t: T) -> T
+where
+    T: Copy,
+    T: Add<Output = T>,
+    T: Sub<Output = T>,
+    T: Mul<Output = T>,
+{
     b + (a - b) * t
 }
 
@@ -194,131 +235,138 @@ pub fn intersection(a0: Pt, a1: Pt, b0: Pt, b1: Pt) -> Option<Pt> {
     }
 }
 
-impl MulAssign for Transform {
-    fn mul_assign(&mut self, rhs: Self) {
-        self.e = self.mul_e(&rhs);
-    }
-}
+macro_rules! define_xform {
+    ($xty:ty, $ptty:ty, $ptexp:expr, $fty:ty) => {
+        impl MulAssign for $xty {
+            fn mul_assign(&mut self, rhs: Self) {
+                self.e = self.mul_e(&rhs);
+            }
+        }
 
-impl Mul for Transform {
-    type Output = Self;
+        impl Mul for $xty {
+            type Output = Self;
 
-    fn mul(self, rhs: Self) -> Self {
-        let e = self.mul_e(&rhs);
-        Transform { e }
-    }
-}
+            fn mul(self, rhs: Self) -> Self {
+                let e = self.mul_e(&rhs);
+                Self { e }
+            }
+        }
 
-impl Mul<Pt> for Transform {
-    type Output = Pt;
+        impl Mul<$ptty> for $xty {
+            type Output = $ptty;
 
-    fn mul(self, s: Pt) -> Pt {
-        let x = self.e[0] * s.x() + self.e[1] * s.y() + self.e[2];
-        let y = self.e[3] * s.x() + self.e[4] * s.y() + self.e[5];
-        Pt(x, y)
-    }
-}
+            fn mul(self, s: $ptty) -> $ptty {
+                let x = self.e[0] * s.x() + self.e[1] * s.y() + self.e[2];
+                let y = self.e[3] * s.x() + self.e[4] * s.y() + self.e[5];
+                $ptexp(x, y)
+            }
+        }
 
-impl Default for Transform {
-    /// Create a new identity transform.
-    fn default() -> Self {
-        Transform {
-            e: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+        impl Default for $xty {
+            /// Create a new identity transform.
+            fn default() -> Self {
+                Self {
+                    e: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+                }
+            }
+        }
+
+        impl $xty {
+            /// Multiple two affine transforms.
+            fn mul_e(&self, rhs: &Self) -> [$fty; 6] {
+                let mut e = [0.0; 6];
+                e[0] = self.e[0] * rhs.e[0] + self.e[3] * rhs.e[1];
+                e[1] = self.e[1] * rhs.e[0] + self.e[4] * rhs.e[1];
+                e[2] = self.e[2] * rhs.e[0] + self.e[5] * rhs.e[1] + rhs.e[2];
+                e[3] = self.e[0] * rhs.e[3] + self.e[3] * rhs.e[4];
+                e[4] = self.e[1] * rhs.e[3] + self.e[4] * rhs.e[4];
+                e[5] = self.e[2] * rhs.e[3] + self.e[5] * rhs.e[4] + rhs.e[5];
+                e
+            }
+
+            /// Create a new translation transform.
+            ///
+            /// * `tx` Amount to translate X.
+            /// * `ty` Amount to translate Y.
+            pub const fn with_translate(tx: $fty, ty: $fty) -> Self {
+                Self {
+                    e: [1.0, 0.0, tx, 0.0, 1.0, ty],
+                }
+            }
+
+            /// Create a new scale transform.
+            ///
+            /// * `sx` Scale factor for X dimension.
+            /// * `sy` Scale factor for Y dimension.
+            pub const fn with_scale(sx: $fty, sy: $fty) -> Self {
+                Self {
+                    e: [sx, 0.0, 0.0, 0.0, sy, 0.0],
+                }
+            }
+
+            /// Create a new rotation transform.
+            ///
+            /// * `th` Angle to rotate coordinates (radians).
+            pub fn with_rotate(th: $fty) -> Self {
+                let sn = th.sin();
+                let cs = th.cos();
+                Self {
+                    e: [cs, -sn, 0.0, sn, cs, 0.0],
+                }
+            }
+
+            /// Create a new skew transform.
+            ///
+            /// * `ax` Angle to skew X-axis (radians).
+            /// * `ay` Angle to skew Y-axis (radians).
+            pub fn with_skew(ax: $fty, ay: $fty) -> Self {
+                let tnx = ax.tan();
+                let tny = ay.tan();
+                Self {
+                    e: [1.0, tnx, 0.0, tny, 1.0, 0.0],
+                }
+            }
+
+            /// Apply translation to a transform.
+            ///
+            /// * `tx` Amount to translate X.
+            /// * `ty` Amount to translate Y.
+            pub fn translate(mut self, tx: $fty, ty: $fty) -> Self {
+                self *= Self::with_translate(tx, ty);
+                self
+            }
+
+            /// Apply scaling to a transform.
+            ///
+            /// * `sx` Scale factor for X dimension.
+            /// * `sy` Scale factor for Y dimension.
+            pub fn scale(mut self, sx: $fty, sy: $fty) -> Self {
+                self *= Self::with_scale(sx, sy);
+                self
+            }
+
+            /// Apply rotation to a transform.
+            ///
+            /// * `th` Angle to rotate coordinates (radians).
+            pub fn rotate(mut self, th: $fty) -> Self {
+                self *= Self::with_rotate(th);
+                self
+            }
+
+            /// Apply skew to a transform.
+            ///
+            /// * `ax` Angle to skew X-axis (radians).
+            /// * `ay` Angle to skew Y-axis (radians).
+            pub fn skew(mut self, ax: $fty, ay: $fty) -> Self {
+                self *= Self::with_skew(ax, ay);
+                self
+            }
         }
     }
 }
 
-impl Transform {
-    /// Multiple two affine transforms.
-    fn mul_e(&self, rhs: &Self) -> [f32; 6] {
-        let mut e = [0.0; 6];
-        e[0] = self.e[0] * rhs.e[0] + self.e[3] * rhs.e[1];
-        e[1] = self.e[1] * rhs.e[0] + self.e[4] * rhs.e[1];
-        e[2] = self.e[2] * rhs.e[0] + self.e[5] * rhs.e[1] + rhs.e[2];
-        e[3] = self.e[0] * rhs.e[3] + self.e[3] * rhs.e[4];
-        e[4] = self.e[1] * rhs.e[3] + self.e[4] * rhs.e[4];
-        e[5] = self.e[2] * rhs.e[3] + self.e[5] * rhs.e[4] + rhs.e[5];
-        e
-    }
-
-    /// Create a new translation transform.
-    ///
-    /// * `tx` Amount to translate X.
-    /// * `ty` Amount to translate Y.
-    pub fn with_translate(tx: f32, ty: f32) -> Self {
-        Transform {
-            e: [1.0, 0.0, tx, 0.0, 1.0, ty],
-        }
-    }
-
-    /// Create a new scale transform.
-    ///
-    /// * `sx` Scale factor for X dimension.
-    /// * `sy` Scale factor for Y dimension.
-    pub fn with_scale(sx: f32, sy: f32) -> Self {
-        Transform {
-            e: [sx, 0.0, 0.0, 0.0, sy, 0.0],
-        }
-    }
-
-    /// Create a new rotation transform.
-    ///
-    /// * `th` Angle to rotate coordinates (radians).
-    pub fn with_rotate(th: f32) -> Self {
-        let sn = th.sin();
-        let cs = th.cos();
-        Transform {
-            e: [cs, -sn, 0.0, sn, cs, 0.0],
-        }
-    }
-
-    /// Create a new skew transform.
-    ///
-    /// * `ax` Angle to skew X-axis (radians).
-    /// * `ay` Angle to skew Y-axis (radians).
-    pub fn with_skew(ax: f32, ay: f32) -> Self {
-        let tnx = ax.tan();
-        let tny = ay.tan();
-        Transform {
-            e: [1.0, tnx, 0.0, tny, 1.0, 0.0],
-        }
-    }
-
-    /// Apply translation to a transform.
-    ///
-    /// * `tx` Amount to translate X.
-    /// * `ty` Amount to translate Y.
-    pub fn translate(mut self, tx: f32, ty: f32) -> Self {
-        self *= Transform::with_translate(tx, ty);
-        self
-    }
-
-    /// Apply scaling to a transform.
-    ///
-    /// * `sx` Scale factor for X dimension.
-    /// * `sy` Scale factor for Y dimension.
-    pub fn scale(mut self, sx: f32, sy: f32) -> Self {
-        self *= Transform::with_scale(sx, sy);
-        self
-    }
-
-    /// Apply rotation to a transform.
-    ///
-    /// * `th` Angle to rotate coordinates (radians).
-    pub fn rotate(mut self, th: f32) -> Self {
-        self *= Transform::with_rotate(th);
-        self
-    }
-
-    /// Apply skew to a transform.
-    ///
-    /// * `ax` Angle to skew X-axis (radians).
-    /// * `ay` Angle to skew Y-axis (radians).
-    pub fn skew(mut self, ax: f32, ay: f32) -> Self {
-        self *= Transform::with_skew(ax, ay);
-        self
-    }
-}
+define_xform!(Transform, Pt, Pt, f32);
+define_xform!(TransformB, PtB, PtB, f64);
 
 #[cfg(test)]
 mod test {
@@ -390,7 +438,7 @@ mod test {
 
     #[test]
     fn test_rotate() {
-        const PI: f32 = f32::consts::PI;
+        const PI: f32 = std::f32::consts::PI;
         const V: f32 = 0.00000008742278;
         assert_eq!(Transform::with_rotate(PI).e, [-1.0, V, 0.0, -V, -1.0, 0.0]);
         assert_eq!(
@@ -405,7 +453,7 @@ mod test {
 
     #[test]
     fn test_skew() {
-        const PI: f32 = f32::consts::PI;
+        const PI: f32 = std::f32::consts::PI;
         assert_eq!(
             Transform::with_skew(PI / 2.0, 0.0).e,
             [1.0, -22877334.0, 0.0, 0.0, 1.0, 0.0]
@@ -443,12 +491,12 @@ mod test {
         assert_eq!(
             Transform::with_translate(3.0, 5.0)
                 * Transform::with_scale(7.0, 11.0)
-                * Transform::with_rotate(f32::consts::PI / 2.0)
+                * Transform::with_rotate(std::f32::consts::PI / 2.0)
                 * Transform::with_skew(1.0, -2.0),
             Transform::default()
                 .translate(3.0, 5.0)
                 .scale(7.0, 11.0)
-                .rotate(f32::consts::PI / 2.0)
+                .rotate(std::f32::consts::PI / 2.0)
                 .skew(1.0, -2.0)
         );
     }

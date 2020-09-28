@@ -8,4 +8,4 @@
 
 mod geom;
 
-pub use geom::{Pt, Transform};
+pub use geom::{Pt, PtB, Transform, TransformB};
