@@ -31,12 +31,13 @@ pub struct PtB(pub f64, pub f64);
 ///
 /// # Example
 /// ```
-/// use pointy::Transform;
+/// use pointy::{Pt, Transform};
 ///
 /// let t = Transform::with_translate(-50.0, -50.0)
 ///     .rotate(std::f32::consts::PI)
 ///     .translate(50.0, 50.0)
 ///     .scale(2.0, 2.0);
+/// let pt = Pt(13.0, 5.5) * t;
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Transform {
@@ -51,12 +52,13 @@ pub struct Transform {
 ///
 /// # Example
 /// ```
-/// use pointy::TransformB;
+/// use pointy::{PtB, TransformB};
 ///
 /// let t = TransformB::with_translate(-50.0, -50.0)
 ///     .rotate(std::f64::consts::PI)
 ///     .translate(50.0, 50.0)
 ///     .scale(2.0, 2.0);
+/// let pt = PtB(13.0, 5.5) * t;
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct TransformB {
@@ -258,6 +260,16 @@ macro_rules! define_xform {
             fn mul(self, s: $ptty) -> $ptty {
                 let x = self.e[0] * s.x() + self.e[1] * s.y() + self.e[2];
                 let y = self.e[3] * s.x() + self.e[4] * s.y() + self.e[5];
+                $ptexp(x, y)
+            }
+        }
+
+        impl Mul<$xty> for $ptty {
+            type Output = $ptty;
+
+            fn mul(self, t: $xty) -> $ptty {
+                let x = t.e[0] * self.x() + t.e[1] * self.y() + t.e[2];
+                let y = t.e[3] * self.x() + t.e[4] * self.y() + t.e[5];
                 $ptexp(x, y)
             }
         }
