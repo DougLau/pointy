@@ -8,6 +8,7 @@ documentation = "https://docs.rs/pointy"
 homepage = "https://github.com/DougLau/pointy"
 repository = "https://github.com/DougLau/pointy"
 readme = "README.md"
+keywords = ["geometry", "2D"]
 edition = "2018"
 
 [dependencies]
