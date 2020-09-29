@@ -79,7 +79,7 @@ mod test {
     const A: Line32 = Line32::new(Pt32(0.0, 0.0), Pt32(1.0, 0.0));
     const B: Line64 = Line64::new(Pt64(0.0, 0.0), Pt64(0.0, 1.0));
     const C: Line32 = Line32::new(Pt32(1.0, 1.0), Pt32(1.0, 0.0));
-	const D: Line64 = Line64::new(Pt64(0.0, 0.0), Pt64(10.0, 0.0));
+    const D: Line64 = Line64::new(Pt64(0.0, 0.0), Pt64(10.0, 0.0));
 
     #[test]
     fn distance() {
@@ -95,14 +95,14 @@ mod test {
     }
 
     #[test]
-	fn projection() {
-		assert_eq!(D.project(Pt64(0.0, 5.0)), Pt64(0.0, 0.0));
-		assert_eq!(D.project(Pt64(5.0, 5.0)), Pt64(5.0, 0.0));
-		assert_eq!(D.project(Pt64(10.0, 5.0)), Pt64(10.0, 0.0));
-		assert_eq!(D.project(Pt64(-5.0, 0.0)), Pt64(-5.0, 0.0));
-		assert_eq!(D.project(Pt64(15.0, 0.0)), Pt64(15.0, 0.0));
-		assert_eq!(D.project(Pt64(0.0, -5.0)), Pt64(0.0, 0.0));
-		assert_eq!(D.project(Pt64(5.0, -5.0)), Pt64(5.0, 0.0));
-		assert_eq!(D.project(Pt64(10.0, -5.0)), Pt64(10.0, 0.0));
-	}
+    fn projection() {
+        assert_eq!(D.project(Pt64(0.0, 5.0)), Pt64(0.0, 0.0));
+        assert_eq!(D.project(Pt64(5.0, 5.0)), Pt64(5.0, 0.0));
+        assert_eq!(D.project(Pt64(10.0, 5.0)), Pt64(10.0, 0.0));
+        assert_eq!(D.project(Pt64(-5.0, 0.0)), Pt64(-5.0, 0.0));
+        assert_eq!(D.project(Pt64(15.0, 0.0)), Pt64(15.0, 0.0));
+        assert_eq!(D.project(Pt64(0.0, -5.0)), Pt64(0.0, 0.0));
+        assert_eq!(D.project(Pt64(5.0, -5.0)), Pt64(5.0, 0.0));
+        assert_eq!(D.project(Pt64(10.0, -5.0)), Pt64(10.0, 0.0));
+    }
 }
