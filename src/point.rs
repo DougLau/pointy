@@ -141,6 +141,11 @@ macro_rules! define_pt {
                 Self(self.y(), -self.x())
             }
 
+            /// Get dot product with another vector
+            pub fn dot(self, rhs: Self) -> $fty {
+                self.x() * rhs.x() + self.y() * rhs.y()
+            }
+
             /// Get vector angle in radians
             pub fn angle(self) -> $fty {
                 self.y().atan2(self.x())

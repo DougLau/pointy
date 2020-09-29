@@ -34,9 +34,30 @@ macro_rules! define_line {
 
             /// Get the distance from the line to a point
             pub fn distance(self, pt: $ptty) -> $fty {
-                let ba = self.1 - self.0;
-                let ca = pt - self.0;
-                (ba * ca).abs() / ba.mag()
+                let v0 = self.1 - self.0;
+                let v1 = pt - self.0;
+                (v0 * v1).abs() / v0.mag()
+            }
+
+            /// Get the distance from the line (as a segment) to a point
+            pub fn segment_distance(self, pt: $ptty) -> $fty {
+                // If the dot product of `v0` and `v1` is greater than zero,
+                // then the nearest point on the segment is `self.1`
+                let v0 = self.1 - self.0;
+                let v1 = pt - self.1;
+                if v0.dot(v1) > 0.0 {
+                    return v1.mag();
+                }
+                // If the dot product of `v2` and `v3` is greater than zero,
+                // then the nearest point on the segment is `self.0`
+                let v2 = self.0 - self.1;
+                let v3 = pt - self.0;
+                if v2.dot(v3) > 0.0 {
+                    return v3.mag();
+                }
+                // Otherwise, the nearest point on the segment is between
+                // `self.0` and `self.1`, so calculate the point-line distance
+                (v0 * v3).abs() / v0.mag()
             }
 
             /// Get the point where two lines intersect
@@ -104,5 +125,17 @@ mod test {
         assert_eq!(D.project(Pt64(0.0, -5.0)), Pt64(0.0, 0.0));
         assert_eq!(D.project(Pt64(5.0, -5.0)), Pt64(5.0, 0.0));
         assert_eq!(D.project(Pt64(10.0, -5.0)), Pt64(10.0, 0.0));
+    }
+
+    #[test]
+    fn segment() {
+        assert_eq!(D.segment_distance(Pt64(0.0, 5.0)), 5.0);
+        assert_eq!(D.segment_distance(Pt64(5.0, 5.0)), 5.0);
+        assert_eq!(D.segment_distance(Pt64(10.0, 5.0)), 5.0);
+        assert_eq!(D.segment_distance(Pt64(-5.0, 0.0)), 5.0);
+        assert_eq!(D.segment_distance(Pt64(15.0, 0.0)), 5.0);
+        assert_eq!(D.segment_distance(Pt64(0.0, -5.0)), 5.0);
+        assert_eq!(D.segment_distance(Pt64(5.0, -5.0)), 5.0);
+        assert_eq!(D.segment_distance(Pt64(10.0, -5.0)), 5.0);
     }
 }
