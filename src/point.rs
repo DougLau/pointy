@@ -4,7 +4,7 @@
 //
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-/// 2-dimensional vector / point with `f32` values.
+/// 2-dimensional point / vector with `f32` values.
 ///
 /// ```rust
 /// use pointy::Pt32;
@@ -14,7 +14,7 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Pt32(pub f32, pub f32);
 
-/// 2-dimensional vector / point with `f64` values.
+/// 2-dimensional point / vector with `f64` values.
 ///
 /// ```rust
 /// use pointy::Pt64;
@@ -53,7 +53,9 @@ macro_rules! define_pt {
         impl Mul for $ptty {
             type Output = $fty;
 
-            /// Calculate the cross product of two vectors
+            /// Get cross product with another vector.
+            ///
+            /// Returns the signed magnitude of the 3D cross product.
             fn mul(self, rhs: Self) -> $fty {
                 self.x() * rhs.y() - self.y() * rhs.x()
             }
@@ -91,7 +93,7 @@ macro_rules! define_pt {
                 self.x().hypot(self.y())
             }
 
-            /// Create a copy normalized to unit length
+            /// Normalize to unit length vector
             pub fn normalize(self) -> Self {
                 let m = self.mag();
                 if m > 0.0 {
@@ -101,14 +103,14 @@ macro_rules! define_pt {
                 }
             }
 
-            /// Calculate the distance squared between two points
+            /// Get distance squared between two points
             pub fn dist_sq(self, rhs: Self) -> $fty {
                 let dx = self.x() - rhs.x();
                 let dy = self.y() - rhs.y();
                 dx * dx + dy * dy
             }
 
-            /// Calculate the distance between two points
+            /// Get distance between two points
             pub fn dist(self, rhs: Self) -> $fty {
                 self.dist_sq(rhs).sqrt()
             }
@@ -129,22 +131,22 @@ macro_rules! define_pt {
                 Self(x, y)
             }
 
-            /// Create a left-hand perpendicular vector
+            /// Get left-hand perpendicular vector
             pub fn left(self) -> Self {
                 Self(-self.y(), self.x())
             }
 
-            /// Create a right-hand perpendicular vector
+            /// Get right-hand perpendicular vector
             pub fn right(self) -> Self {
                 Self(self.y(), -self.x())
             }
 
-            /// Calculate the vector angle in radians
+            /// Get vector angle in radians
             pub fn angle(self) -> $fty {
                 self.y().atan2(self.x())
             }
 
-            /// Calculate the relative angle to another vector / point.
+            /// Get relative angle to another vector.
             ///
             /// The result will be between `-PI` and `+PI`.
             pub fn angle_rel(self, rhs: Self) -> $fty {
