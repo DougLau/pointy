@@ -188,7 +188,7 @@ macro_rules! define_xform {
                 self
             }
         }
-    }
+    };
 }
 
 define_xform!(Transform32, Pt32, Pt32, f32);
@@ -244,7 +244,10 @@ mod test {
     fn test_rotate() {
         const PI: f32 = std::f32::consts::PI;
         const V: f32 = 0.00000008742278;
-        assert_eq!(Transform32::with_rotate(PI).e, [-1.0, V, 0.0, -V, -1.0, 0.0]);
+        assert_eq!(
+            Transform32::with_rotate(PI).e,
+            [-1.0, V, 0.0, -V, -1.0, 0.0]
+        );
         assert_eq!(
             Transform32::default().rotate(PI).e,
             [-1.0, V, 0.0, -V, -1.0, 0.0]

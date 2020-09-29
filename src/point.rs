@@ -1,4 +1,4 @@
-// point.rs     2D Points 
+// point.rs     2D Points
 //
 // Copyright (c) 2020  Douglas P Lau
 //
@@ -153,7 +153,7 @@ macro_rules! define_pt {
                 }
             }
         }
-    }
+    };
 }
 
 define_pt!(Pt32, f32, std::f32::consts::PI);
