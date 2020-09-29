@@ -2,8 +2,8 @@
 //
 // Copyright (c) 2020  Douglas P Lau
 //
-//! Pointy is a minimal 2D geometry library providing points, lines, line
-//! segments and affine transformations.
+//! Pointy is a minimal crate for 2D geometry providing points, lines, segments
+//! and affine transformations.
 #![warn(missing_docs)]
 #![warn(missing_doc_code_examples)]
 
