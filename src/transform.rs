@@ -2,51 +2,51 @@
 //
 // Copyright (c) 2020  Douglas P Lau
 //
-use crate::point::{Pt, PtB};
+use crate::point::{Pt32, Pt64};
 use std::ops::{Mul, MulAssign};
 
-/// An affine transform for [Pt] values.
+/// An affine transform for [Pt32] values.
 ///
 /// A series of translate, rotate, scale and skew transformations can be
-/// combined into a single `Transform`.
+/// combined into a single `Transform32`.
 ///
-/// [Pt]: struct.Pt.html
+/// [Pt32]: struct.Pt32.html
 ///
 /// # Example
 /// ```
-/// use pointy::{Pt, Transform};
+/// use pointy::{Pt32, Transform32};
 ///
-/// let t = Transform::with_translate(-50.0, -50.0)
+/// let t = Transform32::with_translate(-50.0, -50.0)
 ///     .rotate(std::f32::consts::PI)
 ///     .translate(50.0, 50.0)
 ///     .scale(2.0, 2.0);
-/// let pt = Pt(13.0, 5.5) * t;
+/// let pt = Pt32(13.0, 5.5) * t;
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Transform {
+pub struct Transform32 {
     /// First six values in 3x3 matrix (last row assumed to be 0 0 1)
     e: [f32; 6],
 }
 
-/// An affine transform for [PtB] values.
+/// An affine transform for [Pt64] values.
 ///
 /// A series of translate, rotate, scale and skew transformations can be
-/// combined into a single `TransformB`.
+/// combined into a single `Transform64`.
 ///
-/// [PtB]: struct.PtB.html
+/// [Pt64]: struct.Pt64.html
 ///
 /// # Example
 /// ```
-/// use pointy::{PtB, TransformB};
+/// use pointy::{Pt64, Transform64};
 ///
-/// let t = TransformB::with_translate(-50.0, -50.0)
+/// let t = Transform64::with_translate(-50.0, -50.0)
 ///     .rotate(std::f64::consts::PI)
 ///     .translate(50.0, 50.0)
 ///     .scale(2.0, 2.0);
-/// let pt = PtB(13.0, 5.5) * t;
+/// let pt = Pt64(13.0, 5.5) * t;
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct TransformB {
+pub struct Transform64 {
     /// First six values in 3x3 matrix (last row assumed to be 0 0 1)
     e: [f64; 6],
 }
@@ -191,8 +191,8 @@ macro_rules! define_xform {
     }
 }
 
-define_xform!(Transform, Pt, Pt, f32);
-define_xform!(TransformB, PtB, PtB, f64);
+define_xform!(Transform32, Pt32, Pt32, f32);
+define_xform!(Transform64, Pt64, Pt64, f64);
 
 #[cfg(test)]
 mod test {
@@ -200,43 +200,43 @@ mod test {
 
     #[test]
     fn test_identity() {
-        assert_eq!(Transform::default().e, [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]);
+        assert_eq!(Transform32::default().e, [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]);
         assert_eq!(
-            (Transform::default() * Transform::default()).e,
+            (Transform32::default() * Transform32::default()).e,
             [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
         );
-        assert_eq!(Transform::default() * Pt(1.0, 2.0), Pt(1.0, 2.0));
+        assert_eq!(Transform32::default() * Pt32(1.0, 2.0), Pt32(1.0, 2.0));
     }
 
     #[test]
     fn test_translate() {
         assert_eq!(
-            Transform::with_translate(1.5, -1.5).e,
+            Transform32::with_translate(1.5, -1.5).e,
             [1.0, 0.0, 1.5, 0.0, 1.0, -1.5]
         );
         assert_eq!(
-            Transform::default().translate(2.5, -3.5).e,
+            Transform32::default().translate(2.5, -3.5).e,
             [1.0, 0.0, 2.5, 0.0, 1.0, -3.5]
         );
         assert_eq!(
-            Transform::default().translate(5.0, 7.0) * Pt(1.0, -2.0),
-            Pt(6.0, 5.0)
+            Transform32::default().translate(5.0, 7.0) * Pt32(1.0, -2.0),
+            Pt32(6.0, 5.0)
         );
     }
 
     #[test]
     fn test_scale() {
         assert_eq!(
-            Transform::with_scale(2.0, 4.0).e,
+            Transform32::with_scale(2.0, 4.0).e,
             [2.0, 0.0, 0.0, 0.0, 4.0, 0.0]
         );
         assert_eq!(
-            Transform::default().scale(3.0, 5.0).e,
+            Transform32::default().scale(3.0, 5.0).e,
             [3.0, 0.0, 0.0, 0.0, 5.0, 0.0]
         );
         assert_eq!(
-            Transform::default().scale(2.0, 3.0) * Pt(1.5, -2.0),
-            Pt(3.0, -6.0)
+            Transform32::default().scale(2.0, 3.0) * Pt32(1.5, -2.0),
+            Pt32(3.0, -6.0)
         );
     }
 
@@ -244,14 +244,14 @@ mod test {
     fn test_rotate() {
         const PI: f32 = std::f32::consts::PI;
         const V: f32 = 0.00000008742278;
-        assert_eq!(Transform::with_rotate(PI).e, [-1.0, V, 0.0, -V, -1.0, 0.0]);
+        assert_eq!(Transform32::with_rotate(PI).e, [-1.0, V, 0.0, -V, -1.0, 0.0]);
         assert_eq!(
-            Transform::default().rotate(PI).e,
+            Transform32::default().rotate(PI).e,
             [-1.0, V, 0.0, -V, -1.0, 0.0]
         );
         assert_eq!(
-            Transform::default().rotate(PI / 2.0) * Pt(15.0, 7.0),
-            Pt(-7.0000005, 15.0)
+            Transform32::default().rotate(PI / 2.0) * Pt32(15.0, 7.0),
+            Pt32(-7.0000005, 15.0)
         );
     }
 
@@ -259,45 +259,45 @@ mod test {
     fn test_skew() {
         const PI: f32 = std::f32::consts::PI;
         assert_eq!(
-            Transform::with_skew(PI / 2.0, 0.0).e,
+            Transform32::with_skew(PI / 2.0, 0.0).e,
             [1.0, -22877334.0, 0.0, 0.0, 1.0, 0.0]
         );
         assert_eq!(
-            Transform::default().skew(PI / 2.0, 0.0).e,
+            Transform32::default().skew(PI / 2.0, 0.0).e,
             [1.0, -22877334.0, 0.0, 0.0, 1.0, 0.0]
         );
         assert_eq!(
-            Transform::with_skew(0.0, PI / 4.0).e,
+            Transform32::with_skew(0.0, PI / 4.0).e,
             [1.0, 0.0, 0.0, 1.0, 1.0, 0.0]
         );
         assert_eq!(
-            Transform::default().skew(0.0, PI / 4.0).e,
+            Transform32::default().skew(0.0, PI / 4.0).e,
             [1.0, 0.0, 0.0, 1.0, 1.0, 0.0]
         );
         assert_eq!(
-            Transform::default().skew(0.0, PI / 4.0) * Pt(5.0, 3.0),
-            Pt(5.0, 8.0)
+            Transform32::default().skew(0.0, PI / 4.0) * Pt32(5.0, 3.0),
+            Pt32(5.0, 8.0)
         );
         assert_eq!(
-            Transform::default().skew(0.0, PI / 4.0) * Pt(15.0, 7.0),
-            Pt(15.0, 22.0)
+            Transform32::default().skew(0.0, PI / 4.0) * Pt32(15.0, 7.0),
+            Pt32(15.0, 22.0)
         );
     }
 
     #[test]
     fn test_transform() {
         assert_eq!(
-            (Transform::with_translate(1.0, 2.0)
-                * Transform::with_scale(2.0, 2.0))
+            (Transform32::with_translate(1.0, 2.0)
+                * Transform32::with_scale(2.0, 2.0))
             .e,
             [2.0, 0.0, 2.0, 0.0, 2.0, 4.0]
         );
         assert_eq!(
-            Transform::with_translate(3.0, 5.0)
-                * Transform::with_scale(7.0, 11.0)
-                * Transform::with_rotate(std::f32::consts::PI / 2.0)
-                * Transform::with_skew(1.0, -2.0),
-            Transform::default()
+            Transform32::with_translate(3.0, 5.0)
+                * Transform32::with_scale(7.0, 11.0)
+                * Transform32::with_rotate(std::f32::consts::PI / 2.0)
+                * Transform32::with_skew(1.0, -2.0),
+            Transform32::default()
                 .translate(3.0, 5.0)
                 .scale(7.0, 11.0)
                 .rotate(std::f32::consts::PI / 2.0)

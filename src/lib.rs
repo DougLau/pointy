@@ -9,5 +9,5 @@
 mod point;
 mod transform;
 
-pub use point::{Pt, PtB};
-pub use transform::{Transform, TransformB};
+pub use point::{Pt32, Pt64};
+pub use transform::{Transform32, Transform64};

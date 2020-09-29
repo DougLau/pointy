@@ -7,22 +7,22 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 /// 2-dimensional vector / point with `f32` values.
 ///
 /// ```rust
-/// use pointy::Pt;
+/// use pointy::Pt32;
 ///
-/// let pt = Pt(10.0, 15.0);
+/// let pt = Pt32(10.0, 15.0);
 /// ```
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct Pt(pub f32, pub f32);
+pub struct Pt32(pub f32, pub f32);
 
 /// 2-dimensional vector / point with `f64` values.
 ///
 /// ```rust
-/// use pointy::PtB;
+/// use pointy::Pt64;
 ///
-/// let pt = PtB(10.0, 15.0);
+/// let pt = Pt64(10.0, 15.0);
 /// ```
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct PtB(pub f64, pub f64);
+pub struct Pt64(pub f64, pub f64);
 
 macro_rules! define_pt {
     ($ptty:ty, $fty:ty, $pi:expr) => {
@@ -156,8 +156,8 @@ macro_rules! define_pt {
     }
 }
 
-define_pt!(Pt, f32, std::f32::consts::PI);
-define_pt!(PtB, f64, std::f64::consts::PI);
+define_pt!(Pt32, f32, std::f32::consts::PI);
+define_pt!(Pt64, f64, std::f64::consts::PI);
 
 /// Calculate linear interpolation of two values
 ///
@@ -178,23 +178,23 @@ mod test {
 
     #[test]
     fn test_pt() {
-        let a = Pt(2.0, 1.0);
-        let b = Pt(3.0, 4.0);
-        let c = Pt(-1.0, 1.0);
-        assert_eq!(a + b, Pt(5.0, 5.0));
-        assert_eq!(b - a, Pt(1.0, 3.0));
-        assert_eq!(a * 2.0, Pt(4.0, 2.0));
-        assert_eq!(a / 2.0, Pt(1.0, 0.5));
-        assert_eq!(-a, Pt(-2.0, -1.0));
+        let a = Pt32(2.0, 1.0);
+        let b = Pt32(3.0, 4.0);
+        let c = Pt32(-1.0, 1.0);
+        assert_eq!(a + b, Pt32(5.0, 5.0));
+        assert_eq!(b - a, Pt32(1.0, 3.0));
+        assert_eq!(a * 2.0, Pt32(4.0, 2.0));
+        assert_eq!(a / 2.0, Pt32(1.0, 0.5));
+        assert_eq!(-a, Pt32(-2.0, -1.0));
         assert_eq!(b.mag(), 5.0);
-        assert_eq!(a.normalize(), Pt(0.8944272, 0.4472136));
+        assert_eq!(a.normalize(), Pt32(0.8944272, 0.4472136));
         assert_eq!(a.dist_sq(b), 10.0);
-        assert_eq!(b.dist(Pt(0.0, 0.0)), 5.0);
-        assert_eq!(a.midpoint(b), Pt(2.5, 2.5));
-        assert_eq!(a.left(), Pt(-1.0, 2.0));
-        assert_eq!(a.right(), Pt(1.0, -2.0));
+        assert_eq!(b.dist(Pt32(0.0, 0.0)), 5.0);
+        assert_eq!(a.midpoint(b), Pt32(2.5, 2.5));
+        assert_eq!(a.left(), Pt32(-1.0, 2.0));
+        assert_eq!(a.right(), Pt32(1.0, -2.0));
         assert_eq!(a.angle_rel(b), -0.4636476);
-        assert_eq!(c.angle_rel(Pt(1.0, 1.0)), 1.5707963);
-        assert_eq!(Pt(-1.0, -1.0).angle_rel(c), 1.5707965);
+        assert_eq!(c.angle_rel(Pt32(1.0, 1.0)), 1.5707963);
+        assert_eq!(Pt32(-1.0, -1.0).angle_rel(c), 1.5707965);
     }
 }
