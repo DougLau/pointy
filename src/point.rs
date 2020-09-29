@@ -120,6 +120,15 @@ macro_rules! define_pt {
                 Self(x, y)
             }
 
+            /// Calculate linear interpolation of two points.
+            ///
+            /// * `t` Interpolation amount, from 0 to 1
+            pub fn lerp(self, rhs: Self, t: $fty) -> Self {
+                let x = float_lerp(self.x(), rhs.x(), t);
+                let y = float_lerp(self.y(), rhs.y(), t);
+                Self(x, y)
+            }
+
             /// Create a left-hand perpendicular vector
             pub fn left(self) -> Self {
                 Self(-self.y(), self.x())
@@ -130,20 +139,16 @@ macro_rules! define_pt {
                 Self(self.y(), -self.x())
             }
 
-            /// Calculate linear interpolation of two points.
-            ///
-            /// * `t` Interpolation amount, from 0 to 1
-            pub fn lerp(self, rhs: Self, t: $fty) -> Self {
-                let x = float_lerp(self.x(), rhs.x(), t);
-                let y = float_lerp(self.y(), rhs.y(), t);
-                Self(x, y)
+            /// Calculate the vector angle in radians
+            pub fn angle(self) -> $fty {
+                self.y().atan2(self.x())
             }
 
             /// Calculate the relative angle to another vector / point.
             ///
             /// The result will be between `-PI` and `+PI`.
             pub fn angle_rel(self, rhs: Self) -> $fty {
-                let th = self.y().atan2(self.x()) - rhs.y().atan2(rhs.x());
+                let th = self.angle() - rhs.angle();
                 if th < -$pi {
                     th + 2.0 * $pi
                 } else if th > $pi {
@@ -176,25 +181,32 @@ where
 mod test {
     use super::*;
 
+    const A: Pt32 = Pt32(2.0, 1.0);
+    const B: Pt32 = Pt32(3.0, 4.0);
+    const C: Pt32 = Pt32(-1.0, 1.0);
+
     #[test]
-    fn test_pt() {
-        let a = Pt32(2.0, 1.0);
-        let b = Pt32(3.0, 4.0);
-        let c = Pt32(-1.0, 1.0);
-        assert_eq!(a + b, Pt32(5.0, 5.0));
-        assert_eq!(b - a, Pt32(1.0, 3.0));
-        assert_eq!(a * 2.0, Pt32(4.0, 2.0));
-        assert_eq!(a / 2.0, Pt32(1.0, 0.5));
-        assert_eq!(-a, Pt32(-2.0, -1.0));
-        assert_eq!(b.mag(), 5.0);
-        assert_eq!(a.normalize(), Pt32(0.8944272, 0.4472136));
-        assert_eq!(a.dist_sq(b), 10.0);
-        assert_eq!(b.dist(Pt32(0.0, 0.0)), 5.0);
-        assert_eq!(a.midpoint(b), Pt32(2.5, 2.5));
-        assert_eq!(a.left(), Pt32(-1.0, 2.0));
-        assert_eq!(a.right(), Pt32(1.0, -2.0));
-        assert_eq!(a.angle_rel(b), -0.4636476);
-        assert_eq!(c.angle_rel(Pt32(1.0, 1.0)), 1.5707963);
-        assert_eq!(Pt32(-1.0, -1.0).angle_rel(c), 1.5707965);
+    fn points() {
+        assert_eq!(A + B, Pt32(5.0, 5.0));
+        assert_eq!(B - A, Pt32(1.0, 3.0));
+        assert_eq!(A * 2.0, Pt32(4.0, 2.0));
+        assert_eq!(A / 2.0, Pt32(1.0, 0.5));
+        assert_eq!(-A, Pt32(-2.0, -1.0));
+        assert_eq!(B.mag(), 5.0);
+        assert_eq!(A.normalize(), Pt32(0.8944272, 0.4472136));
+        assert_eq!(A.dist_sq(B), 10.0);
+        assert_eq!(B.dist(Pt32(0.0, 0.0)), 5.0);
+        assert_eq!(A.midpoint(B), Pt32(2.5, 2.5));
+        assert_eq!(A.left(), Pt32(-1.0, 2.0));
+        assert_eq!(A.right(), Pt32(1.0, -2.0));
+    }
+
+    #[test]
+    fn angles() {
+        assert_eq!(Pt32(0.0, 0.0).angle(), 0.0);
+        assert_eq!(Pt32(-1.0, 0.0).angle(), std::f32::consts::PI);
+        assert_eq!(A.angle_rel(B), -0.4636476);
+        assert_eq!(C.angle_rel(Pt32(1.0, 1.0)), 1.5707963);
+        assert_eq!(Pt32(-1.0, -1.0).angle_rel(C), 1.5707965);
     }
 }
