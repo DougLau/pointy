@@ -75,8 +75,8 @@ macro_rules! define_line {
                     let v2 = self.0 - rhs.0;
                     let num = v1 * v2;
                     let u = num / den;
-                    let x = self.0.x() + u * (self.1.x() - self.0.x());
-                    let y = self.0.y() + u * (self.1.y() - self.0.y());
+                    let x = self.0.x() + u * v0.x();
+                    let y = self.0.y() + u * v0.y();
                     Some($ptexp(x, y))
                 } else {
                     None
