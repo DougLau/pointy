@@ -136,7 +136,7 @@ macro_rules! define_pt {
                 }
             }
 
-            /// Get distance squared between two points
+            /// Get distance squared to another point
             pub fn dist_sq<P: Into<Self>>(self, rhs: P) -> $fty {
                 let rhs = rhs.into();
                 let dx = self.x() - rhs.x();
@@ -144,12 +144,12 @@ macro_rules! define_pt {
                 dx * dx + dy * dy
             }
 
-            /// Get distance between two points
+            /// Get distance to another point
             pub fn dist<P: Into<Self>>(self, rhs: P) -> $fty {
                 self.dist_sq(rhs.into()).sqrt()
             }
 
-            /// Get the midpoint of two points
+            /// Get the midpoint from this to another point
             pub fn midpoint<P: Into<Self>>(self, rhs: P) -> Self {
                 let rhs = rhs.into();
                 let x = (self.x() + rhs.x()) / 2.0;
@@ -157,7 +157,7 @@ macro_rules! define_pt {
                 Self(x, y)
             }
 
-            /// Calculate linear interpolation of two points.
+            /// Calculate linear interpolation to another point.
             ///
             /// * `t` Interpolation amount, from 0 to 1
             pub fn lerp<P: Into<Self>>(self, rhs: P, t: $fty) -> Self {
