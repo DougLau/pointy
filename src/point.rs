@@ -26,6 +26,12 @@ pub struct Pt64(pub f64, pub f64);
 
 macro_rules! define_pt {
     ($ptty:ty, $fty:ty, $pi:expr) => {
+        impl From<($fty, $fty)> for $ptty {
+            fn from(pt: ($fty, $fty)) -> Self {
+                Self(pt.0, pt.1)
+            }
+        }
+
         impl Add for $ptty {
             type Output = Self;
 
@@ -34,11 +40,27 @@ macro_rules! define_pt {
             }
         }
 
+        impl Add<($fty, $fty)> for $ptty {
+            type Output = Self;
+
+            fn add(self, rhs: ($fty, $fty)) -> Self {
+                self + Self::from(rhs)
+            }
+        }
+
         impl Sub for $ptty {
             type Output = Self;
 
             fn sub(self, rhs: Self) -> Self {
                 Self(self.x() - rhs.x(), self.y() - rhs.y())
+            }
+        }
+
+        impl Sub<($fty, $fty)> for $ptty {
+            type Output = Self;
+
+            fn sub(self, rhs: ($fty, $fty)) -> Self {
+                self - Self::from(rhs)
             }
         }
 
@@ -58,6 +80,17 @@ macro_rules! define_pt {
             /// Returns the signed magnitude of the 3D cross product.
             fn mul(self, rhs: Self) -> $fty {
                 self.x() * rhs.y() - self.y() * rhs.x()
+            }
+        }
+
+        impl Mul<($fty, $fty)> for $ptty {
+            type Output = $fty;
+
+            /// Get cross product with another vector.
+            ///
+            /// Returns the signed magnitude of the 3D cross product.
+            fn mul(self, rhs: ($fty, $fty)) -> $fty {
+                self * Self::from(rhs)
             }
         }
 
@@ -104,19 +137,21 @@ macro_rules! define_pt {
             }
 
             /// Get distance squared between two points
-            pub fn dist_sq(self, rhs: Self) -> $fty {
+            pub fn dist_sq<P: Into<Self>>(self, rhs: P) -> $fty {
+                let rhs = rhs.into();
                 let dx = self.x() - rhs.x();
                 let dy = self.y() - rhs.y();
                 dx * dx + dy * dy
             }
 
             /// Get distance between two points
-            pub fn dist(self, rhs: Self) -> $fty {
-                self.dist_sq(rhs).sqrt()
+            pub fn dist<P: Into<Self>>(self, rhs: P) -> $fty {
+                self.dist_sq(rhs.into()).sqrt()
             }
 
             /// Get the midpoint of two points
-            pub fn midpoint(self, rhs: Self) -> Self {
+            pub fn midpoint<P: Into<Self>>(self, rhs: P) -> Self {
+                let rhs = rhs.into();
                 let x = (self.x() + rhs.x()) / 2.0;
                 let y = (self.y() + rhs.y()) / 2.0;
                 Self(x, y)
@@ -125,7 +160,8 @@ macro_rules! define_pt {
             /// Calculate linear interpolation of two points.
             ///
             /// * `t` Interpolation amount, from 0 to 1
-            pub fn lerp(self, rhs: Self, t: $fty) -> Self {
+            pub fn lerp<P: Into<Self>>(self, rhs: P, t: $fty) -> Self {
+                let rhs = rhs.into();
                 let x = float_lerp(self.x(), rhs.x(), t);
                 let y = float_lerp(self.y(), rhs.y(), t);
                 Self(x, y)
@@ -142,7 +178,8 @@ macro_rules! define_pt {
             }
 
             /// Get dot product with another vector
-            pub fn dot(self, rhs: Self) -> $fty {
+            pub fn dot<P: Into<Self>>(self, rhs: P) -> $fty {
+                let rhs = rhs.into();
                 self.x() * rhs.x() + self.y() * rhs.y()
             }
 
@@ -154,7 +191,8 @@ macro_rules! define_pt {
             /// Get relative angle to another vector.
             ///
             /// The result will be between `-PI` and `+PI`.
-            pub fn angle_rel(self, rhs: Self) -> $fty {
+            pub fn angle_rel<P: Into<Self>>(self, rhs: P) -> $fty {
+                let rhs = rhs.into();
                 let th = self.angle() - rhs.angle();
                 if th < -$pi {
                     th + 2.0 * $pi
@@ -202,7 +240,7 @@ mod test {
         assert_eq!(B.mag(), 5.0);
         assert_eq!(A.normalize(), Pt32(0.8944272, 0.4472136));
         assert_eq!(A.dist_sq(B), 10.0);
-        assert_eq!(B.dist(Pt32(0.0, 0.0)), 5.0);
+        assert_eq!(B.dist((0.0, 0.0)), 5.0);
         assert_eq!(A.midpoint(B), Pt32(2.5, 2.5));
         assert_eq!(A.left(), Pt32(-1.0, 2.0));
         assert_eq!(A.right(), Pt32(1.0, -2.0));
@@ -213,7 +251,7 @@ mod test {
         assert_eq!(Pt32(0.0, 0.0).angle(), 0.0);
         assert_eq!(Pt32(-1.0, 0.0).angle(), std::f32::consts::PI);
         assert_eq!(A.angle_rel(B), -0.4636476);
-        assert_eq!(C.angle_rel(Pt32(1.0, 1.0)), 1.5707963);
+        assert_eq!(C.angle_rel((1.0, 1.0)), 1.5707963);
         assert_eq!(Pt32(-1.0, -1.0).angle_rel(C), 1.5707965);
     }
 }

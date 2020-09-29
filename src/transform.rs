@@ -21,6 +21,8 @@ use std::ops::{Mul, MulAssign};
 ///     .translate(50.0, 50.0)
 ///     .scale(2.0, 2.0);
 /// let pt = Pt32(13.0, 5.5) * t;
+/// let pt2 = (8.2, 4.7) * t;
+/// let pt3 = t * (3.8, 9.6);
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Transform32 {
@@ -78,6 +80,14 @@ macro_rules! define_xform {
             }
         }
 
+        impl Mul<($fty, $fty)> for $xty {
+            type Output = $ptty;
+
+            fn mul(self, s: ($fty, $fty)) -> $ptty {
+                self * <$ptty>::from(s)
+            }
+        }
+
         impl Mul<$xty> for $ptty {
             type Output = $ptty;
 
@@ -85,6 +95,14 @@ macro_rules! define_xform {
                 let x = t.e[0] * self.x() + t.e[1] * self.y() + t.e[2];
                 let y = t.e[3] * self.x() + t.e[4] * self.y() + t.e[5];
                 $ptexp(x, y)
+            }
+        }
+
+        impl Mul<$xty> for ($fty, $fty) {
+            type Output = $ptty;
+
+            fn mul(self, t: $xty) -> $ptty {
+                <$ptty>::from(self) * t
             }
         }
 
@@ -278,7 +296,7 @@ mod test {
             [1.0, 0.0, 0.0, 1.0, 1.0, 0.0]
         );
         assert_eq!(
-            Transform32::default().skew(0.0, PI / 4.0) * Pt32(5.0, 3.0),
+            Transform32::default().skew(0.0, PI / 4.0) * (5.0, 3.0),
             Pt32(5.0, 8.0)
         );
         assert_eq!(

@@ -28,19 +28,25 @@ macro_rules! define_line {
     ($lnty:ty, $ptty:ty, $ptexp:expr, $fty:ty) => {
         impl $lnty {
             /// Create a new line
-            pub const fn new(a: $ptty, b: $ptty) -> Self {
-                Self(a, b)
+            pub fn new<P0, P1>(a: P0, b: P1) -> Self
+            where
+                P0: Into<$ptty>,
+                P1: Into<$ptty>,
+            {
+                Self(a.into(), b.into())
             }
 
             /// Get the distance from the line to a point
-            pub fn distance(self, pt: $ptty) -> $fty {
+            pub fn distance<P: Into<$ptty>>(self, pt: P) -> $fty {
+                let pt = pt.into();
                 let v0 = self.1 - self.0;
                 let v1 = pt - self.0;
                 (v0 * v1).abs() / v0.mag()
             }
 
             /// Get the distance from the line (as a segment) to a point
-            pub fn segment_distance(self, pt: $ptty) -> $fty {
+            pub fn segment_distance<P: Into<$ptty>>(self, pt: P) -> $fty {
+                let pt = pt.into();
                 // If the dot product of `v0` and `v1` is greater than zero,
                 // then the nearest point on the segment is `self.1`
                 let v0 = self.1 - self.0;
@@ -80,7 +86,8 @@ macro_rules! define_line {
             /// Project a point onto the line.
             ///
             /// Returns the point on the line nearest to the given point.
-            pub fn project(self, pt: $ptty) -> $ptty {
+            pub fn project<P: Into<$ptty>>(self, pt: P) -> $ptty {
+                let pt = pt.into();
                 let perp = (self.1 - self.0).right();
                 let x1 = pt.x() + perp.x();
                 let y1 = pt.y() + perp.y();
@@ -97,45 +104,47 @@ define_line!(Line64, Pt64, Pt64, f64);
 mod test {
     use super::*;
 
-    const A: Line32 = Line32::new(Pt32(0.0, 0.0), Pt32(1.0, 0.0));
-    const B: Line64 = Line64::new(Pt64(0.0, 0.0), Pt64(0.0, 1.0));
-    const C: Line32 = Line32::new(Pt32(1.0, 1.0), Pt32(1.0, 0.0));
-    const D: Line64 = Line64::new(Pt64(0.0, 0.0), Pt64(10.0, 0.0));
-
     #[test]
     fn distance() {
-        assert_eq!(A.distance(Pt32(0.0, 1.0)), 1.0);
-        assert_eq!(B.distance(Pt64(2.0, 0.0)), 2.0);
+        let a = Line32::new((0.0, 0.0), (1.0, 0.0));
+        assert_eq!(a.distance((0.0, 1.0)), 1.0);
+        let b = Line64::new((0.0, 0.0), (0.0, 1.0));
+        assert_eq!(b.distance((2.0, 0.0)), 2.0);
     }
 
     #[test]
     fn intersection() {
-        assert_eq!(A.intersection(A), None);
-        assert_eq!(A.intersection(C), Some(Pt32(1.0, 0.0)));
-        assert_eq!(B.intersection(B), None);
+        let a = Line32::new((0.0, 0.0), (1.0, 0.0));
+        assert_eq!(a.intersection(a), None);
+        let c = Line32::new((1.0, 1.0), (1.0, 0.0));
+        assert_eq!(a.intersection(c), Some(Pt32(1.0, 0.0)));
+        let b = Line64::new((0.0, 0.0), (0.0, 1.0));
+        assert_eq!(b.intersection(b), None);
     }
 
     #[test]
     fn projection() {
-        assert_eq!(D.project(Pt64(0.0, 5.0)), Pt64(0.0, 0.0));
-        assert_eq!(D.project(Pt64(5.0, 5.0)), Pt64(5.0, 0.0));
-        assert_eq!(D.project(Pt64(10.0, 5.0)), Pt64(10.0, 0.0));
-        assert_eq!(D.project(Pt64(-5.0, 0.0)), Pt64(-5.0, 0.0));
-        assert_eq!(D.project(Pt64(15.0, 0.0)), Pt64(15.0, 0.0));
-        assert_eq!(D.project(Pt64(0.0, -5.0)), Pt64(0.0, 0.0));
-        assert_eq!(D.project(Pt64(5.0, -5.0)), Pt64(5.0, 0.0));
-        assert_eq!(D.project(Pt64(10.0, -5.0)), Pt64(10.0, 0.0));
+        let d = Line64::new((0.0, 0.0), (10.0, 0.0));
+        assert_eq!(d.project((0.0, 5.0)), Pt64(0.0, 0.0));
+        assert_eq!(d.project((5.0, 5.0)), Pt64(5.0, 0.0));
+        assert_eq!(d.project((10.0, 5.0)), Pt64(10.0, 0.0));
+        assert_eq!(d.project((-5.0, 0.0)), Pt64(-5.0, 0.0));
+        assert_eq!(d.project((15.0, 0.0)), Pt64(15.0, 0.0));
+        assert_eq!(d.project((0.0, -5.0)), Pt64(0.0, 0.0));
+        assert_eq!(d.project((5.0, -5.0)), Pt64(5.0, 0.0));
+        assert_eq!(d.project((10.0, -5.0)), Pt64(10.0, 0.0));
     }
 
     #[test]
     fn segment() {
-        assert_eq!(D.segment_distance(Pt64(0.0, 5.0)), 5.0);
-        assert_eq!(D.segment_distance(Pt64(5.0, 5.0)), 5.0);
-        assert_eq!(D.segment_distance(Pt64(10.0, 5.0)), 5.0);
-        assert_eq!(D.segment_distance(Pt64(-5.0, 0.0)), 5.0);
-        assert_eq!(D.segment_distance(Pt64(15.0, 0.0)), 5.0);
-        assert_eq!(D.segment_distance(Pt64(0.0, -5.0)), 5.0);
-        assert_eq!(D.segment_distance(Pt64(5.0, -5.0)), 5.0);
-        assert_eq!(D.segment_distance(Pt64(10.0, -5.0)), 5.0);
+        let a = Line64::new((0.0, 0.0), (10.0, 0.0));
+        assert_eq!(a.segment_distance((0.0, 5.0)), 5.0);
+        assert_eq!(a.segment_distance((5.0, 5.0)), 5.0);
+        assert_eq!(a.segment_distance((10.0, 5.0)), 5.0);
+        assert_eq!(a.segment_distance((-5.0, 0.0)), 5.0);
+        assert_eq!(a.segment_distance((15.0, 0.0)), 5.0);
+        assert_eq!(a.segment_distance((0.0, -5.0)), 5.0);
+        assert_eq!(a.segment_distance((5.0, -5.0)), 5.0);
+        assert_eq!(a.segment_distance((10.0, -5.0)), 5.0);
     }
 }
