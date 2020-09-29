@@ -6,6 +6,8 @@
 #![warn(missing_docs)]
 #![warn(missing_doc_code_examples)]
 
-mod geom;
+mod point;
+mod transform;
 
-pub use geom::{Pt, PtB, Transform, TransformB};
+pub use point::{Pt, PtB};
+pub use transform::{Transform, TransformB};
