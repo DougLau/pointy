@@ -32,6 +32,12 @@ macro_rules! define_pt {
             }
         }
 
+        impl From<$fty> for $ptty {
+            fn from(angle: $fty) -> Self {
+                Self::from_angle(angle)
+            }
+        }
+
         impl Add for $ptty {
             type Output = Self;
 
@@ -111,6 +117,11 @@ macro_rules! define_pt {
         }
 
         impl $ptty {
+            /// Create a unit vector from an angle (radians)
+            pub fn from_angle(angle: $fty) -> Self {
+                Self(angle.cos(), angle.sin())
+            }
+
             /// Get the X value
             pub const fn x(self) -> $fty {
                 self.0
@@ -225,6 +236,7 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
+    use assert_approx_eq::*;
 
     const A: Pt32 = Pt32(2.0, 1.0);
     const B: Pt32 = Pt32(3.0, 4.0);
@@ -253,5 +265,17 @@ mod test {
         assert_eq!(A.angle_rel(B), -0.4636476);
         assert_eq!(C.angle_rel((1.0, 1.0)), 1.5707963);
         assert_eq!(Pt32(-1.0, -1.0).angle_rel(C), 1.5707965);
+        let v = Pt32::from(0.0);
+        assert_approx_eq!(v.x(), 1.0);
+        assert_approx_eq!(v.y(), 0.0);
+        let v = Pt32::from_angle(std::f32::consts::PI / 2.0);
+        assert_approx_eq!(v.x(), 0.0);
+        assert_approx_eq!(v.y(), 1.0);
+        let v = Pt32::from_angle(std::f32::consts::PI);
+        assert_approx_eq!(v.x(), -1.0);
+        assert_approx_eq!(v.y(), 0.0);
+        let v = Pt32::from_angle(std::f32::consts::PI * 1.5);
+        assert_approx_eq!(v.x(), 0.0);
+        assert_approx_eq!(v.y(), -1.0);
     }
 }
