@@ -2,8 +2,7 @@
 //
 // Copyright (c) 2020  Douglas P Lau
 //
-//! Pointy is a minimal crate for 2D geometry providing points, lines, segments
-//! and affine transformations.
+#![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
 #![warn(missing_doc_code_examples)]
 
