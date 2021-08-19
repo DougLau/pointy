@@ -1,7 +1,6 @@
 [package]
 name = "pointy"
 version = "0.2.0"
-authors = ["Doug Lau <doug.p.lau@gmail.com>"]
 description = "Minimal 2D geometry library"
 license = "MIT/Apache-2.0"
 documentation = "https://docs.rs/pointy"
