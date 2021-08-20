@@ -4,7 +4,7 @@
 //
 use crate::point::{Pt32, Pt64};
 
-/// Axis-aligned rectangle with [Pt32] points.
+/// Axis-aligned bounding box with [Pt32] points.
 ///
 /// [Pt32]: struct.Pt32.html
 ///
@@ -19,7 +19,7 @@ use crate::point::{Pt32, Pt64};
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct BBox32(Pt32, Pt32);
 
-/// Axis-aligned rectangle with [Pt64] points.
+/// Axis-aligned bounding box with [Pt64] points.
 ///
 /// [Pt64]: struct.Pt64.html
 ///
@@ -38,8 +38,8 @@ macro_rules! define_bbox {
     ($bxty:ty, $fty:ty, $ptty:ty) => {
         impl From<($ptty, $ptty)> for $bxty {
             fn from(pts: ($ptty, $ptty)) -> Self {
-                let pt0 = pts.0.min_pt(pts.1);
-                let pt1 = pts.0.max_pt(pts.1);
+                let pt0 = pts.0.with_min(pts.1);
+                let pt1 = pts.0.with_max(pts.1);
                 Self(pt0, pt1)
             }
         }
