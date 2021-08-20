@@ -3,6 +3,8 @@
 // Copyright (c) 2020-2021  Douglas P Lau
 //
 use crate::point::{Pt32, Pt64};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// 2-dimensional line with `f32` values.
 ///
@@ -12,6 +14,7 @@ use crate::point::{Pt32, Pt64};
 /// let line = Line32::new(Pt32(10.0, 15.0), Pt32(0.0, 2.0));
 /// ```
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Line32(Pt32, Pt32);
 
 /// 2-dimensional line with `f64` values.
@@ -22,6 +25,7 @@ pub struct Line32(Pt32, Pt32);
 /// let line = Line64::new(Pt64(10.0, 15.0), Pt64(0.0, 2.0));
 /// ```
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Line64(Pt64, Pt64);
 
 macro_rules! define_line {

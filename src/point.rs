@@ -2,6 +2,8 @@
 //
 // Copyright (c) 2020-2021  Douglas P Lau
 //
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 /// 2-dimensional point / vector with `f32` values.
@@ -12,6 +14,7 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 /// let pt = Pt32(10.0, 15.0);
 /// ```
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Pt32(pub f32, pub f32);
 
 /// 2-dimensional point / vector with `f64` values.
@@ -22,6 +25,7 @@ pub struct Pt32(pub f32, pub f32);
 /// let pt = Pt64(10.0, 15.0);
 /// ```
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Pt64(pub f64, pub f64);
 
 macro_rules! define_pt {

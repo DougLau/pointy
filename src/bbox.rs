@@ -3,6 +3,8 @@
 // Copyright (c) 2020-2021  Douglas P Lau
 //
 use crate::point::{Pt32, Pt64};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// Axis-aligned bounding box with [Pt32] points.
 ///
@@ -17,6 +19,7 @@ use crate::point::{Pt32, Pt64};
 /// let bbox = BBox32::from((p0, p1));
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BBox32 {
     minp: Pt32,
     maxp: Pt32,
@@ -35,6 +38,7 @@ pub struct BBox32 {
 /// let bbox = BBox64::from((p0, p1));
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BBox64 {
     minp: Pt64,
     maxp: Pt64,

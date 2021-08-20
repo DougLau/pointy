@@ -3,6 +3,8 @@
 // Copyright (c) 2020-2021  Douglas P Lau
 //
 use crate::point::{Pt32, Pt64};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 use std::ops::{Mul, MulAssign};
 
 /// An affine transform for [Pt32] values.
@@ -25,6 +27,7 @@ use std::ops::{Mul, MulAssign};
 /// let pt3 = t * (3.8, 9.6);
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Transform32 {
     /// First six values in 3x3 matrix (last row assumed to be 0 0 1)
     e: [f32; 6],
@@ -48,6 +51,7 @@ pub struct Transform32 {
 /// let pt = Pt64(13.0, 5.5) * t;
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Transform64 {
     /// First six values in 3x3 matrix (last row assumed to be 0 0 1)
     e: [f64; 6],
