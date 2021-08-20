@@ -236,6 +236,12 @@ macro_rules! define_pt {
 define_pt!(Pt32, f32, std::f32::consts::PI);
 define_pt!(Pt64, f64, std::f64::consts::PI);
 
+impl From<Pt32> for Pt64 {
+    fn from(pt: Pt32) -> Self {
+        Self(pt.x().into(), pt.y().into())
+    }
+}
+
 /// Calculate linear interpolation of two values
 ///
 /// The t value should be between 0 and 1.
