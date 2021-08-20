@@ -132,6 +132,22 @@ macro_rules! define_pt {
                 self.1
             }
 
+            /// Get point with minimum component values of two points
+            pub fn min_pt<P: Into<Self>>(self, rhs: P) -> Self {
+                let rhs = rhs.into();
+                let x = self.x().min(rhs.x());
+                let y = self.y().min(rhs.y());
+                Self(x, y)
+            }
+
+            /// Get point with maximum component values of two points
+            pub fn max_pt<P: Into<Self>>(self, rhs: P) -> Self {
+                let rhs = rhs.into();
+                let x = self.x().max(rhs.x());
+                let y = self.y().max(rhs.y());
+                Self(x, y)
+            }
+
             /// Get the magnitude (length) of a vector
             pub fn mag(self) -> $fty {
                 self.x().hypot(self.y())
