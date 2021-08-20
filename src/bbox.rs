@@ -36,6 +36,12 @@ pub struct BBox64(Pt64, Pt64);
 
 macro_rules! define_bbox {
     ($bxty:ty, $fty:ty, $ptty:ty) => {
+        impl From<$ptty> for $bxty {
+            fn from(pt: $ptty) -> Self {
+                Self(pt, pt)
+            }
+        }
+
         impl From<($ptty, $ptty)> for $bxty {
             fn from(pts: ($ptty, $ptty)) -> Self {
                 let pt0 = pts.0.with_min(pts.1);

@@ -1,6 +1,6 @@
 // transform.rs     Affine transforms
 //
-// Copyright (c) 2020  Douglas P Lau
+// Copyright (c) 2020-2021  Douglas P Lau
 //
 use crate::point::{Pt32, Pt64};
 use std::ops::{Mul, MulAssign};
@@ -54,7 +54,7 @@ pub struct Transform64 {
 }
 
 macro_rules! define_xform {
-    ($xty:ty, $ptty:ty, $ptexp:expr, $fty:ty) => {
+    ($xty:ty, $ptty:ty, $fty:ty) => {
         impl MulAssign for $xty {
             fn mul_assign(&mut self, rhs: Self) {
                 self.e = self.mul_e(&rhs);
@@ -76,7 +76,7 @@ macro_rules! define_xform {
             fn mul(self, s: $ptty) -> $ptty {
                 let x = self.e[0] * s.x() + self.e[1] * s.y() + self.e[2];
                 let y = self.e[3] * s.x() + self.e[4] * s.y() + self.e[5];
-                $ptexp(x, y)
+                <$ptty>::from((x, y))
             }
         }
 
@@ -94,7 +94,7 @@ macro_rules! define_xform {
             fn mul(self, t: $xty) -> $ptty {
                 let x = t.e[0] * self.x() + t.e[1] * self.y() + t.e[2];
                 let y = t.e[3] * self.x() + t.e[4] * self.y() + t.e[5];
-                $ptexp(x, y)
+                <$ptty>::from((x, y))
             }
         }
 
@@ -209,8 +209,8 @@ macro_rules! define_xform {
     };
 }
 
-define_xform!(Transform32, Pt32, Pt32, f32);
-define_xform!(Transform64, Pt64, Pt64, f64);
+define_xform!(Transform32, Pt32, f32);
+define_xform!(Transform64, Pt64, f64);
 
 #[cfg(test)]
 mod test {

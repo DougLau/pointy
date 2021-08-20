@@ -1,6 +1,6 @@
 // line.rs      2D Lines
 //
-// Copyright (c) 2020  Douglas P Lau
+// Copyright (c) 2020-2021  Douglas P Lau
 //
 use crate::point::{Pt32, Pt64};
 
@@ -25,7 +25,7 @@ pub struct Line32(Pt32, Pt32);
 pub struct Line64(Pt64, Pt64);
 
 macro_rules! define_line {
-    ($lnty:ty, $ptty:ty, $ptexp:expr, $fty:ty) => {
+    ($lnty:ty, $ptty:ty, $fty:ty) => {
         impl $lnty {
             /// Create a new line
             pub fn new<P0, P1>(a: P0, b: P1) -> Self
@@ -77,7 +77,7 @@ macro_rules! define_line {
                     let u = num / den;
                     let x = self.0.x() + u * v0.x();
                     let y = self.0.y() + u * v0.y();
-                    Some($ptexp(x, y))
+                    Some(<$ptty>::from((x, y)))
                 } else {
                     None
                 }
@@ -91,14 +91,15 @@ macro_rules! define_line {
                 let perp = (self.1 - self.0).right();
                 let x1 = pt.x() + perp.x();
                 let y1 = pt.y() + perp.y();
-                self.intersection(Self::new(pt, $ptexp(x1, y1))).unwrap()
+                let p1 = <$ptty>::from((x1, y1));
+                self.intersection(Self::new(pt, p1)).unwrap()
             }
         }
     };
 }
 
-define_line!(Line32, Pt32, Pt32, f32);
-define_line!(Line64, Pt64, Pt64, f64);
+define_line!(Line32, Pt32, f32);
+define_line!(Line64, Pt64, f64);
 
 #[cfg(test)]
 mod test {

@@ -1,6 +1,6 @@
 // point.rs     2D Points
 //
-// Copyright (c) 2020  Douglas P Lau
+// Copyright (c) 2020-2021  Douglas P Lau
 //
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
