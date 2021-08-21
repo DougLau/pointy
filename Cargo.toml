@@ -11,6 +11,7 @@ keywords = ["geometry", "2D"]
 edition = "2018"
 
 [dependencies]
+num-traits = "0.2"
 serde = { version = "1.0", optional = true, features = ["derive"] }
 
 [dev-dependencies]

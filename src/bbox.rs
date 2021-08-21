@@ -2,123 +2,127 @@
 //
 // Copyright (c) 2020-2021  Douglas P Lau
 //
-use crate::point::{Pt32, Pt64};
+use crate::point::{Float, Pt};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Axis-aligned bounding box with [Pt32] points.
-///
-/// [Pt32]: struct.Pt32.html
+/// Axis-aligned bounding box
 ///
 /// # Example
 /// ```
-/// use pointy::{BBox32, Pt32};
+/// use pointy::{BBox, Pt};
 ///
-/// let p0 = Pt32(-10.0, 0.0);
-/// let p1 = Pt32(10.0, 8.0);
-/// let bbox = BBox32::from((p0, p1));
+/// let p0 = Pt::new(-10.0, 0.0);
+/// let p1 = Pt::new(10.0, 8.0);
+/// let bbox = BBox::from((p0, p1));
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct BBox32 {
-    minp: Pt32,
-    maxp: Pt32,
+pub struct BBox<F>
+where
+    F: Float,
+{
+    minp: Pt<F>,
+    maxp: Pt<F>,
 }
 
-/// Axis-aligned bounding box with [Pt64] points.
-///
-/// [Pt64]: struct.Pt64.html
-///
-/// # Example
-/// ```
-/// use pointy::{BBox64, Pt64};
-///
-/// let p0 = Pt64(-10.0, 0.0);
-/// let p1 = Pt64(10.0, 8.0);
-/// let bbox = BBox64::from((p0, p1));
-/// ```
-#[derive(Clone, Copy, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct BBox64 {
-    minp: Pt64,
-    maxp: Pt64,
+impl<F> Default for BBox<F>
+where
+    F: Float,
+{
+    fn default() -> Self {
+        let minp = Pt::from((F::max_value(), F::max_value()));
+        let maxp = Pt::from((F::min_value(), F::min_value()));
+        Self { minp, maxp }
+    }
 }
 
-macro_rules! define_bbox {
-    ($bxty:ty, $fty:ty, $ptty:ty) => {
-        impl Default for $bxty {
-            fn default() -> Self {
-                let minp = <$ptty>::from((<$fty>::MAX, <$fty>::MAX));
-                let maxp = <$ptty>::from((<$fty>::MIN, <$fty>::MIN));
-                Self { minp, maxp }
-            }
-        }
-
-        impl From<$ptty> for $bxty {
-            fn from(pt: $ptty) -> Self {
-                Self { minp: pt, maxp: pt }
-            }
-        }
-
-        impl From<($ptty, $ptty)> for $bxty {
-            fn from(pts: ($ptty, $ptty)) -> Self {
-                let minp = pts.0.with_min(pts.1);
-                let maxp = pts.0.with_max(pts.1);
-                Self { minp, maxp }
-            }
-        }
-
-        impl $bxty {
-            /// Create a new axis-aligned bounding box
-            pub fn new<'a, I>(pts: I) -> Self
-            where
-                I: IntoIterator<Item = &'a $ptty>,
-            {
-                pts.into_iter()
-                    .fold(Self::default(), |bb, p| bb.include_pt(*p))
-            }
-
-            fn include_pt(self, p: $ptty) -> Self {
-                let minp = self.minp.with_min(p);
-                let maxp = self.maxp.with_max(p);
-                Self { minp, maxp }
-            }
-
-            /// Get the minimum X value
-            pub fn x_min(self) -> $fty {
-                self.minp.x()
-            }
-
-            /// Get the maximum X value
-            pub fn x_max(self) -> $fty {
-                self.maxp.x()
-            }
-
-            /// Get the minimum Y value
-            pub fn y_min(self) -> $fty {
-                self.minp.y()
-            }
-
-            /// Get the maximum Y value
-            pub fn y_max(self) -> $fty {
-                self.maxp.y()
-            }
-
-            /// Get the X span
-            pub fn x_span(self) -> $fty {
-                self.x_max() - self.x_min()
-            }
-
-            /// Get the Y span
-            pub fn y_span(self) -> $fty {
-                self.y_max() - self.y_min()
-            }
-        }
-    };
+impl<F> From<Pt<F>> for BBox<F>
+where
+    F: Float,
+{
+    fn from(pt: Pt<F>) -> Self {
+        Self { minp: pt, maxp: pt }
+    }
 }
 
-define_bbox!(BBox32, f32, Pt32);
-define_bbox!(BBox64, f64, Pt64);
+impl<F, P> From<(P, P)> for BBox<F>
+where
+    F: Float,
+    P: Into<Pt<F>>,
+{
+    fn from(pts: (P, P)) -> Self {
+        let p0 = pts.0.into();
+        let p1 = pts.1.into();
+        let minp = p0.with_min(p1);
+        let maxp = p0.with_max(p1);
+        Self { minp, maxp }
+    }
+}
+
+impl<F, P> From<[P; 2]> for BBox<F>
+where
+    F: Float,
+    P: Into<Pt<F>> + Copy,
+{
+    fn from(pts: [P; 2]) -> Self {
+        let p0 = pts[0].into();
+        let p1 = pts[1].into();
+        let minp = p0.with_min(p1);
+        let maxp = p0.with_max(p1);
+        Self { minp, maxp }
+    }
+}
+
+impl<'a, F> BBox<F>
+where
+    F: 'a + Float,
+{
+    /// Create a new axis-aligned bounding box
+    pub fn new<I>(pts: I) -> Self
+    where
+        I: IntoIterator<Item = &'a Pt<F>>,
+    {
+        pts.into_iter()
+            .fold(Self::default(), |bb, p| bb.include_pt(*p))
+    }
+
+    fn include_pt(self, p: Pt<F>) -> Self {
+        let minp = self.minp.with_min(p);
+        let maxp = self.maxp.with_max(p);
+        Self { minp, maxp }
+    }
+
+    /// Get the minimum X value
+    pub fn x_min(self) -> F {
+        self.minp.x()
+    }
+
+    /// Get the maximum X value
+    pub fn x_max(self) -> F {
+        self.maxp.x()
+    }
+
+    /// Get the minimum Y value
+    pub fn y_min(self) -> F {
+        self.minp.y()
+    }
+
+    /// Get the maximum Y value
+    pub fn y_max(self) -> F {
+        self.maxp.y()
+    }
+
+    /// Get the X span
+    pub fn x_span(self) -> F {
+        self.x_max() - self.x_min()
+    }
+
+    /// Get the Y span
+    pub fn y_span(self) -> F {
+        self.y_max() - self.y_min()
+    }
+}
 
 #[cfg(test)]
 mod test {
@@ -126,8 +130,7 @@ mod test {
 
     #[test]
     fn bounds() {
-        let b =
-            BBox64::from((Pt64::from((0.0, 10.0)), Pt64::from((100.0, 200.0))));
+        let b = BBox::from((Pt::new(0.0, 10.0), Pt::new(100.0, 200.0)));
         assert_eq!(b.x_min(), 0.0);
         assert_eq!(b.x_max(), 100.0);
         assert_eq!(b.x_span(), 100.0);
@@ -139,11 +142,11 @@ mod test {
     #[test]
     fn from_vec() {
         let pts = [
-            Pt64::from((5.2, 55.8)),
-            Pt64::from((-58.8, 20.0)),
-            Pt64::from((150.0, -240.0)),
+            Pt::new(5.2, 55.8),
+            Pt::new(-58.8, 20.0),
+            Pt::new(150.0, -240.0),
         ];
-        let b = BBox64::new(&pts);
+        let b = BBox::new(&pts);
         assert_eq!(b.x_min(), -58.8);
         assert_eq!(b.x_max(), 150.0);
         assert_eq!(b.x_span(), 208.8);

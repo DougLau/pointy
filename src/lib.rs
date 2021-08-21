@@ -11,7 +11,7 @@ mod line;
 mod point;
 mod transform;
 
-pub use bbox::{BBox32, BBox64};
-pub use line::{Line32, Line64};
-pub use point::{Pt32, Pt64};
-pub use transform::{Transform32, Transform64};
+pub use bbox::BBox;
+pub use line::Line;
+pub use point::{Float, Pt};
+pub use transform::Transform;
