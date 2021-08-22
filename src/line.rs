@@ -6,7 +6,7 @@ use crate::point::{Float, Pt};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// 2-dimensional line
+/// A line or segment
 ///
 /// ```rust
 /// use pointy::Line;
