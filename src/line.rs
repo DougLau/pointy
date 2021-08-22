@@ -87,7 +87,7 @@ where
             let u = num / den;
             let x = self.p0.x() + u * v0.x();
             let y = self.p0.y() + u * v0.y();
-            Some(Pt::from((x, y)))
+            Some(Pt::new(x, y))
         } else {
             None
         }
@@ -104,7 +104,7 @@ where
         let perp = (self.p1 - self.p0).right();
         let x1 = pt.x() + perp.x();
         let y1 = pt.y() + perp.y();
-        let p1 = Pt::from((x1, y1));
+        let p1 = Pt::new(x1, y1);
         self.intersection(Self::new(pt, p1)).unwrap()
     }
 }

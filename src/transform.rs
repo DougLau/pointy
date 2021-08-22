@@ -67,7 +67,7 @@ where
     fn mul(self, s: Pt<F>) -> Pt<F> {
         let x = self.e[0] * s.x() + self.e[1] * s.y() + self.e[2];
         let y = self.e[3] * s.x() + self.e[4] * s.y() + self.e[5];
-        Pt::from((x, y))
+        Pt::new(x, y)
     }
 }
 
@@ -91,7 +91,7 @@ where
     fn mul(self, t: Transform<F>) -> Self {
         let x = t.e[0] * self.x() + t.e[1] * self.y() + t.e[2];
         let y = t.e[3] * self.x() + t.e[4] * self.y() + t.e[5];
-        Pt::from((x, y))
+        Pt::new(x, y)
     }
 }
 

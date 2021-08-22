@@ -139,7 +139,7 @@ mod test {
 
     #[test]
     fn bounds() {
-        let b = BBox::from((Pt::new(0.0, 10.0), Pt::new(100.0, 200.0)));
+        let b = BBox::from(((0.0, 10.0), (100.0, 200.0)));
         assert_eq!(b.x_min(), 0.0);
         assert_eq!(b.x_max(), 100.0);
         assert_eq!(b.x_span(), 100.0);
