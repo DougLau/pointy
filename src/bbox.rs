@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// let p0 = Pt::new(-10.0, 0.0);
 /// let p1 = Pt::new(10.0, 8.0);
-/// let bbox = BBox::from((p0, p1));
+/// let bbox = BBox::new([p0, p1]);
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -32,8 +32,8 @@ where
     F: Float,
 {
     fn default() -> Self {
-        let minp = Pt::from((F::max_value(), F::max_value()));
-        let maxp = Pt::from((F::min_value(), F::min_value()));
+        let minp = Pt::new(F::max_value(), F::max_value());
+        let maxp = Pt::new(F::min_value(), F::min_value());
         Self { minp, maxp }
     }
 }
@@ -53,11 +53,7 @@ where
     P: Into<Pt<F>>,
 {
     fn from(pts: (P, P)) -> Self {
-        let p0 = pts.0.into();
-        let p1 = pts.1.into();
-        let minp = p0.with_min(p1);
-        let maxp = p0.with_max(p1);
-        Self { minp, maxp }
+        Self::new([pts.0, pts.1])
     }
 }
 
@@ -67,28 +63,29 @@ where
     P: Into<Pt<F>> + Copy,
 {
     fn from(pts: [P; 2]) -> Self {
-        let p0 = pts[0].into();
-        let p1 = pts[1].into();
-        let minp = p0.with_min(p1);
-        let maxp = p0.with_max(p1);
-        Self { minp, maxp }
+        Self::new(pts)
     }
 }
 
-impl<'a, F> BBox<F>
+impl<F> BBox<F>
 where
-    F: 'a + Float,
+    F: Float,
 {
     /// Create a new axis-aligned bounding box
-    pub fn new<I>(pts: I) -> Self
+    pub fn new<I, P>(pts: I) -> Self
     where
-        I: IntoIterator<Item = &'a Pt<F>>,
+        I: IntoIterator<Item = P>,
+        P: Into<Pt<F>>,
     {
         pts.into_iter()
-            .fold(Self::default(), |bb, p| bb.include_pt(*p))
+            .fold(Self::default(), |bb, p| bb.include_pt(p))
     }
 
-    fn include_pt(self, p: Pt<F>) -> Self {
+    fn include_pt<P>(self, p: P) -> Self
+    where
+        P: Into<Pt<F>>,
+    {
+        let p = p.into();
         let minp = self.minp.with_min(p);
         let maxp = self.maxp.with_max(p);
         Self { minp, maxp }
@@ -126,10 +123,10 @@ where
 
     /// Check if it intersects with another bounding box
     pub fn intersects(self, rhs: Self) -> bool {
-        self.x_min() <= rhs.x_max() &&
-        self.x_max() >= rhs.x_min() &&
-        self.y_min() <= rhs.y_max() &&
-        self.y_max() >= rhs.y_min()
+        self.x_min() <= rhs.x_max()
+            && self.x_max() >= rhs.x_min()
+            && self.y_min() <= rhs.y_max()
+            && self.y_max() >= rhs.y_min()
     }
 }
 
@@ -139,7 +136,7 @@ mod test {
 
     #[test]
     fn bounds() {
-        let b = BBox::from(((0.0, 10.0), (100.0, 200.0)));
+        let b = BBox::new([(0.0, 10.0), (100.0, 200.0)]);
         assert_eq!(b.x_min(), 0.0);
         assert_eq!(b.x_max(), 100.0);
         assert_eq!(b.x_span(), 100.0);
@@ -155,7 +152,7 @@ mod test {
             Pt::new(-58.8, 20.0),
             Pt::new(150.0, -240.0),
         ];
-        let b = BBox::new(&pts);
+        let b = BBox::new(pts);
         assert_eq!(b.x_min(), -58.8);
         assert_eq!(b.x_max(), 150.0);
         assert_eq!(b.x_span(), 208.8);
@@ -166,12 +163,12 @@ mod test {
 
     #[test]
     fn intersects() {
-        let a = BBox::from([(0.0, 0.0), (1.0, 1.0)]);
-        assert!(a.intersects(BBox::from([(0.0, 0.0), (5.0, 5.0)])));
-        assert!(a.intersects(BBox::from([(-1.0, -1.0), (0.0, 0.0)])));
-        assert!(a.intersects(BBox::from([(0.0, 0.5), (1.0, 1.0)])));
-        assert!(a.intersects(BBox::from([(1.0, 1.0), (2.0, 2.0)])));
-        assert!(!a.intersects(BBox::from([(1.1, 1.0), (2.0, 2.0)])));
-        assert!(!a.intersects(BBox::from([(0.0, 10.0), (100.0, 200.0)])));
+        let a = BBox::new([(0.0, 0.0), (1.0, 1.0)]);
+        assert!(a.intersects(BBox::new([(0.0, 0.0), (5.0, 5.0)])));
+        assert!(a.intersects(BBox::new([(-1.0, -1.0), (0.0, 0.0)])));
+        assert!(a.intersects(BBox::new([(0.0, 0.5), (1.0, 1.0)])));
+        assert!(a.intersects(BBox::new([(1.0, 1.0), (2.0, 2.0)])));
+        assert!(!a.intersects(BBox::new([(1.1, 1.0), (2.0, 2.0)])));
+        assert!(!a.intersects(BBox::new([(0.0, 10.0), (100.0, 200.0)])));
     }
 }
