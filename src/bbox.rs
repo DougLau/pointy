@@ -123,6 +123,14 @@ where
     pub fn y_span(self) -> F {
         self.y_max() - self.y_min()
     }
+
+    /// Check if it intersects with another bounding box
+    pub fn intersects(self, rhs: Self) -> bool {
+        self.x_min() <= rhs.x_max() &&
+        self.x_max() >= rhs.x_min() &&
+        self.y_min() <= rhs.y_max() &&
+        self.y_max() >= rhs.y_min()
+    }
 }
 
 #[cfg(test)]
@@ -154,5 +162,16 @@ mod test {
         assert_eq!(b.y_min(), -240.0);
         assert_eq!(b.y_max(), 55.8);
         assert_eq!(b.y_span(), 295.8);
+    }
+
+    #[test]
+    fn intersects() {
+        let a = BBox::from([(0.0, 0.0), (1.0, 1.0)]);
+        assert!(a.intersects(BBox::from([(0.0, 0.0), (5.0, 5.0)])));
+        assert!(a.intersects(BBox::from([(-1.0, -1.0), (0.0, 0.0)])));
+        assert!(a.intersects(BBox::from([(0.0, 0.5), (1.0, 1.0)])));
+        assert!(a.intersects(BBox::from([(1.0, 1.0), (2.0, 2.0)])));
+        assert!(!a.intersects(BBox::from([(1.1, 1.0), (2.0, 2.0)])));
+        assert!(!a.intersects(BBox::from([(0.0, 10.0), (100.0, 200.0)])));
     }
 }
