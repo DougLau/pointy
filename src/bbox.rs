@@ -2,7 +2,8 @@
 //
 // Copyright (c) 2020-2021  Douglas P Lau
 //
-use crate::point::{Float, Pt};
+use crate::float::Float;
+use crate::point::Pt;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
