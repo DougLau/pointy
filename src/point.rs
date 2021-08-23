@@ -25,6 +25,15 @@ where
     y: F,
 }
 
+impl<F> From<&Pt<F>> for Pt<F>
+where
+    F: Float,
+{
+    fn from(pt: &Pt<F>) -> Self {
+        Self { x: pt.x, y: pt.y }
+    }
+}
+
 impl<F> From<(F, F)> for Pt<F>
 where
     F: Float,
