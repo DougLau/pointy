@@ -47,6 +47,15 @@ where
     }
 }
 
+impl<F> From<&Pt<F>> for BBox<F>
+where
+    F: Float,
+{
+    fn from(pt: &Pt<F>) -> Self {
+        Self { minp: *pt, maxp: *pt }
+    }
+}
+
 impl<F, P> From<(P, P)> for BBox<F>
 where
     F: Float,
@@ -145,6 +154,13 @@ mod test {
 
     #[test]
     fn bounds() {
+        let a = BBox::from(&Pt::new(0.0, 0.0));
+        assert_eq!(a.x_min(), 0.0);
+        assert_eq!(a.x_max(), 0.0);
+        assert_eq!(a.x_span(), 0.0);
+        assert_eq!(a.y_min(), 0.0);
+        assert_eq!(a.y_max(), 0.0);
+        assert_eq!(a.y_span(), 0.0);
         let b = BBox::new([(0.0, 10.0), (100.0, 200.0)]);
         assert_eq!(b.x_min(), 0.0);
         assert_eq!(b.x_max(), 100.0);
