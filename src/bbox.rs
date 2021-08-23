@@ -77,8 +77,17 @@ where
         I: IntoIterator<Item = P>,
         P: Into<Pt<F>>,
     {
+        Self::default().extend(pts)
+    }
+
+    /// Extend bounding box with a set of points
+    pub fn extend<I, P>(self, pts: I) -> Self
+    where
+        I: IntoIterator<Item = P>,
+        P: Into<Pt<F>>,
+    {
         pts.into_iter()
-            .fold(Self::default(), |bb, p| bb.include_pt(p))
+            .fold(self, |bb, p| bb.include_pt(p))
     }
 
     fn include_pt<P>(self, p: P) -> Self
@@ -170,5 +179,17 @@ mod test {
         assert!(a.intersects(BBox::new([(1.0, 1.0), (2.0, 2.0)])));
         assert!(!a.intersects(BBox::new([(1.1, 1.0), (2.0, 2.0)])));
         assert!(!a.intersects(BBox::new([(0.0, 10.0), (100.0, 200.0)])));
+    }
+
+    #[test]
+    fn extend() {
+        let a = BBox::new([(0.0, 0.0), (1.0, 1.0)]);
+        let b = a.extend([(-1.0, -1.0)]);
+        assert_eq!(b.x_min(), -1.0);
+        assert_eq!(b.x_max(), 1.0);
+        assert_eq!(b.x_span(), 2.0);
+        assert_eq!(b.y_min(), -1.0);
+        assert_eq!(b.y_max(), 1.0);
+        assert_eq!(b.y_span(), 2.0);
     }
 }
