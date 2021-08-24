@@ -86,27 +86,28 @@ where
         I: IntoIterator<Item = P>,
         P: Into<Pt<F>>,
     {
-        Self::default().extend(pts)
+        let mut bbox = Self::default();
+        bbox.extend(pts);
+        bbox
     }
 
     /// Extend bounding box with a set of points
-    pub fn extend<I, P>(self, pts: I) -> Self
+    pub fn extend<I, P>(&mut self, pts: I)
     where
         I: IntoIterator<Item = P>,
         P: Into<Pt<F>>,
     {
         pts.into_iter()
-            .fold(self, |bb, p| bb.include_pt(p))
+            .for_each(|p| self.include_pt(p));
     }
 
-    fn include_pt<P>(self, p: P) -> Self
+    fn include_pt<P>(&mut self, p: P)
     where
         P: Into<Pt<F>>,
     {
         let p = p.into();
-        let minp = self.minp.with_min(p);
-        let maxp = self.maxp.with_max(p);
-        Self { minp, maxp }
+        self.minp = self.minp.with_min(p);
+        self.maxp = self.maxp.with_max(p);
     }
 
     /// Get the minimum X value
@@ -199,13 +200,13 @@ mod test {
 
     #[test]
     fn extend() {
-        let a = BBox::new([(0.0, 0.0), (1.0, 1.0)]);
-        let b = a.extend([(-1.0, -1.0)]);
-        assert_eq!(b.x_min(), -1.0);
-        assert_eq!(b.x_max(), 1.0);
-        assert_eq!(b.x_span(), 2.0);
-        assert_eq!(b.y_min(), -1.0);
-        assert_eq!(b.y_max(), 1.0);
-        assert_eq!(b.y_span(), 2.0);
+        let mut a = BBox::new([(0.0, 0.0), (1.0, 1.0)]);
+        a.extend([(-1.0, -1.0)]);
+        assert_eq!(a.x_min(), -1.0);
+        assert_eq!(a.x_max(), 1.0);
+        assert_eq!(a.x_span(), 2.0);
+        assert_eq!(a.y_min(), -1.0);
+        assert_eq!(a.y_max(), 1.0);
+        assert_eq!(a.y_span(), 2.0);
     }
 }
