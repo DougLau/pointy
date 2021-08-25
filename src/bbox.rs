@@ -165,6 +165,11 @@ where
         self.pts[0].x()
     }
 
+    /// Get the middle X value
+    pub fn x_mid(self) -> F {
+        (self.x_min() + self.x_max()) / (F::one() + F::one())
+    }
+
     /// Get the maximum X value
     pub fn x_max(self) -> F {
         self.pts[1].x()
@@ -173,6 +178,11 @@ where
     /// Get the minimum Y value
     pub fn y_min(self) -> F {
         self.pts[0].y()
+    }
+
+    /// Get the middle Y value
+    pub fn y_mid(self) -> F {
+        (self.y_min() + self.y_max()) / (F::one() + F::one())
     }
 
     /// Get the maximum Y value
