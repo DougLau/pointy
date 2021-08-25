@@ -23,8 +23,56 @@ pub struct BBox<F>
 where
     F: Float,
 {
-    minp: Pt<F>,
-    maxp: Pt<F>,
+    pts: [Pt<F>; 2],
+}
+
+/// Iterator for points in a bounding box
+pub struct BBoxIter<F>
+where
+    F: Float,
+{
+    pts: [Pt<F>; 2],
+    i: u8,
+}
+
+impl<F> BBoxIter<F>
+where
+    F: Float,
+{
+    fn new(pts: [Pt<F>; 2]) -> Self {
+        Self { pts, i: 0 }
+    }
+}
+
+impl<F> Iterator for BBoxIter<F>
+where
+    F: Float,
+{
+    type Item = Pt<F>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.i == 0 {
+            self.i = 1;
+            Some(self.pts[0])
+        } else if self.i == 1 {
+            self.i = 2;
+            Some(self.pts[1])
+        } else {
+            None
+        }
+    }
+}
+
+impl<F> IntoIterator for BBox<F>
+where
+    F: Float,
+{
+    type Item = Pt<F>;
+    type IntoIter = BBoxIter<F>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        BBoxIter::new(self.pts)
+    }
 }
 
 impl<F> Default for BBox<F>
@@ -34,7 +82,8 @@ where
     fn default() -> Self {
         let minp = Pt::new(F::max_value(), F::max_value());
         let maxp = Pt::new(F::min_value(), F::min_value());
-        Self { minp, maxp }
+        let pts = [minp, maxp];
+        Self { pts }
     }
 }
 
@@ -43,7 +92,7 @@ where
     F: Float,
 {
     fn from(pt: Pt<F>) -> Self {
-        Self { minp: pt, maxp: pt }
+        Self { pts: [pt, pt] }
     }
 }
 
@@ -52,7 +101,7 @@ where
     F: Float,
 {
     fn from(pt: &Pt<F>) -> Self {
-        Self { minp: *pt, maxp: *pt }
+        Self { pts: [*pt, *pt] }
     }
 }
 
@@ -106,28 +155,29 @@ where
         P: Into<Pt<F>>,
     {
         let p = p.into();
-        self.minp = self.minp.with_min(p);
-        self.maxp = self.maxp.with_max(p);
+        let minp = self.pts[0].with_min(p);
+        let maxp = self.pts[1].with_max(p);
+        self.pts = [minp, maxp];
     }
 
     /// Get the minimum X value
     pub fn x_min(self) -> F {
-        self.minp.x()
+        self.pts[0].x()
     }
 
     /// Get the maximum X value
     pub fn x_max(self) -> F {
-        self.maxp.x()
+        self.pts[1].x()
     }
 
     /// Get the minimum Y value
     pub fn y_min(self) -> F {
-        self.minp.y()
+        self.pts[0].y()
     }
 
     /// Get the maximum Y value
     pub fn y_max(self) -> F {
-        self.maxp.y()
+        self.pts[1].y()
     }
 
     /// Get the X span

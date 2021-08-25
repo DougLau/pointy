@@ -12,7 +12,7 @@ mod line;
 mod point;
 mod transform;
 
-pub use bbox::BBox;
+pub use bbox::{BBox, BBoxIter};
 pub use float::Float;
 pub use line::Line;
 pub use point::Pt;
