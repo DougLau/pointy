@@ -258,5 +258,13 @@ mod test {
         assert_eq!(a.y_min(), -1.0);
         assert_eq!(a.y_max(), 1.0);
         assert_eq!(a.y_span(), 2.0);
+        let mut a = BBox::default();
+        a.extend([(0.0, 0.0)]);
+        assert_eq!(a.x_min(), 0.0);
+        assert_eq!(a.x_max(), 0.0);
+        assert_eq!(a.x_span(), 0.0);
+        assert_eq!(a.y_min(), 0.0);
+        assert_eq!(a.y_max(), 0.0);
+        assert_eq!(a.y_span(), 0.0);
     }
 }
