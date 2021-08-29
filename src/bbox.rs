@@ -146,8 +146,7 @@ where
         I: IntoIterator<Item = P>,
         P: Into<Pt<F>>,
     {
-        pts.into_iter()
-            .for_each(|p| self.include_pt(p));
+        pts.into_iter().for_each(|p| self.include_pt(p));
     }
 
     fn include_pt<P>(&mut self, p: P)
