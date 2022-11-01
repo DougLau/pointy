@@ -1,6 +1,6 @@
 // transform.rs     Affine transforms
 //
-// Copyright (c) 2020-2021  Douglas P Lau
+// Copyright (c) 2020-2022  Douglas P Lau
 //
 use crate::float::Float;
 use crate::point::Pt;
@@ -27,7 +27,7 @@ use std::ops::{Mul, MulAssign};
 /// let pt2 = (8.2, 4.7) * t;
 /// let pt3 = t * (3.8, 9.6);
 /// ```
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Transform<F>
 where

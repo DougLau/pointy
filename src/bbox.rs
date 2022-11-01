@@ -1,6 +1,6 @@
 // bbox.rs      Bounding boxes
 //
-// Copyright (c) 2020-2021  Douglas P Lau
+// Copyright (c) 2020-2022  Douglas P Lau
 //
 use crate::float::Float;
 use crate::point::Pt;
@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 /// let p1 = Pt::new(10.0, 8.0);
 /// let bbox = BBox::new([p0, p1]);
 /// ```
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BBox<F>
 where

@@ -1,6 +1,6 @@
 // point.rs     2D Points
 //
-// Copyright (c) 2020-2021  Douglas P Lau
+// Copyright (c) 2020-2022  Douglas P Lau
 //
 use crate::float::Float;
 #[cfg(feature = "serde")]
@@ -15,7 +15,7 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 ///
 /// let pt = Pt::new(10.0, 15.0);
 /// ```
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Pt<F>
 where

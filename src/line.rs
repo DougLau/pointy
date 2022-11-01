@@ -1,6 +1,6 @@
 // line.rs      2D Lines
 //
-// Copyright (c) 2020-2021  Douglas P Lau
+// Copyright (c) 2020-2022  Douglas P Lau
 //
 use crate::float::Float;
 use crate::point::Pt;
@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// let line = Line::new((10.0, 15.0), (0.0, 2.0));
 /// ```
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Line<F>
 where
