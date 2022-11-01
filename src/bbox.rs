@@ -7,6 +7,15 @@ use crate::point::Pt;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+/// Trait for comparing a shape with a bounding box
+pub trait Bounded<F>
+where
+    F: Float,
+{
+    /// Check if inside a bounding box (at least partially)
+    fn bounded_by(self, bbox: BBox<F>) -> bool;
+}
+
 /// Axis-aligned bounding box
 ///
 /// # Example
@@ -125,6 +134,18 @@ where
     }
 }
 
+impl<F> Bounded<F> for BBox<F>
+where
+    F: Float,
+{
+    fn bounded_by(self, bbox: BBox<F>) -> bool {
+        self.x_min() <= bbox.x_max()
+            && self.x_max() >= bbox.x_min()
+            && self.y_min() <= bbox.y_max()
+            && self.y_max() >= bbox.y_min()
+    }
+}
+
 impl<F> BBox<F>
 where
     F: Float,
@@ -198,14 +219,6 @@ where
     pub fn y_span(self) -> F {
         self.y_max() - self.y_min()
     }
-
-    /// Check if it intersects with another bounding box
-    pub fn intersects(self, rhs: Self) -> bool {
-        self.x_min() <= rhs.x_max()
-            && self.x_max() >= rhs.x_min()
-            && self.y_min() <= rhs.y_max()
-            && self.y_max() >= rhs.y_min()
-    }
 }
 
 #[cfg(test)]
@@ -247,14 +260,14 @@ mod test {
     }
 
     #[test]
-    fn intersects() {
+    fn bounded_by() {
         let a = BBox::new([(0.0, 0.0), (1.0, 1.0)]);
-        assert!(a.intersects(BBox::new([(0.0, 0.0), (5.0, 5.0)])));
-        assert!(a.intersects(BBox::new([(-1.0, -1.0), (0.0, 0.0)])));
-        assert!(a.intersects(BBox::new([(0.0, 0.5), (1.0, 1.0)])));
-        assert!(a.intersects(BBox::new([(1.0, 1.0), (2.0, 2.0)])));
-        assert!(!a.intersects(BBox::new([(1.1, 1.0), (2.0, 2.0)])));
-        assert!(!a.intersects(BBox::new([(0.0, 10.0), (100.0, 200.0)])));
+        assert!(a.bounded_by(BBox::new([(0.0, 0.0), (5.0, 5.0)])));
+        assert!(a.bounded_by(BBox::new([(-1.0, -1.0), (0.0, 0.0)])));
+        assert!(a.bounded_by(BBox::new([(0.0, 0.5), (1.0, 1.0)])));
+        assert!(a.bounded_by(BBox::new([(1.0, 1.0), (2.0, 2.0)])));
+        assert!(!a.bounded_by(BBox::new([(1.1, 1.0), (2.0, 2.0)])));
+        assert!(!a.bounded_by(BBox::new([(0.0, 10.0), (100.0, 200.0)])));
     }
 
     #[test]
