@@ -74,31 +74,6 @@ where
         (v0 * v1).abs() / v0.mag()
     }
 
-    /// Get the distance from the line (as a segment) to a point
-    pub fn segment_distance<P>(self, pt: P) -> F
-    where
-        P: Into<Pt<F>>,
-    {
-        let pt = pt.into();
-        // If the dot product of `v0` and `v1` is greater than zero,
-        // then the nearest point on the segment is `p1`
-        let v0 = self.p1 - self.p0;
-        let v1 = pt - self.p1;
-        if v0.dot(v1) > F::zero() {
-            return v1.mag();
-        }
-        // If the dot product of `v2` and `v3` is greater than zero,
-        // then the nearest point on the segment is `p0`
-        let v2 = self.p0 - self.p1;
-        let v3 = pt - self.p0;
-        if v2.dot(v3) > F::zero() {
-            return v3.mag();
-        }
-        // Otherwise, the nearest point on the segment is between
-        // `p0` and `p1`, so calculate the point-line distance
-        (v0 * v3).abs() / v0.mag()
-    }
-
     /// Get the point where two lines intersect
     pub fn intersection(self, rhs: Self) -> Option<Pt<F>> {
         let v0 = self.p1 - self.p0;
