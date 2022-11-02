@@ -7,7 +7,7 @@ use crate::point::Pt;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// A line or segment
+/// A line
 ///
 /// ```rust
 /// use pointy::Line;
@@ -20,8 +20,31 @@ pub struct Line<F>
 where
     F: Float,
 {
-    p0: Pt<F>,
-    p1: Pt<F>,
+    /// First point
+    pub p0: Pt<F>,
+
+    /// Second point
+    pub p1: Pt<F>,
+}
+
+/// A line segment
+///
+/// ```rust
+/// use pointy::Seg;
+///
+/// let seg = Seg::new((10.0, 15.0), (0.0, 2.0));
+/// ```
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct Seg<F>
+where
+    F: Float,
+{
+    /// First point
+    pub p0: Pt<F>,
+
+    /// Second point
+    pub p1: Pt<F>,
 }
 
 impl<F> Line<F>
@@ -109,6 +132,48 @@ where
     }
 }
 
+impl<F> Seg<F>
+where
+    F: Float,
+{
+    /// Create a new line segment
+    pub fn new<P0, P1>(p0: P0, p1: P1) -> Self
+    where
+        P0: Into<Pt<F>>,
+        P1: Into<Pt<F>>,
+    {
+        Self {
+            p0: p0.into(),
+            p1: p1.into(),
+        }
+    }
+
+    /// Get the distance from the line segment to a point
+    pub fn distance<P>(self, pt: P) -> F
+    where
+        P: Into<Pt<F>>,
+    {
+        let pt = pt.into();
+        // If the dot product of `v0` and `v1` is greater than zero,
+        // then the nearest point on the segment is `p1`
+        let v0 = self.p1 - self.p0;
+        let v1 = pt - self.p1;
+        if v0.dot(v1) > F::zero() {
+            return v1.mag();
+        }
+        // If the dot product of `v2` and `v3` is greater than zero,
+        // then the nearest point on the segment is `p0`
+        let v2 = self.p0 - self.p1;
+        let v3 = pt - self.p0;
+        if v2.dot(v3) > F::zero() {
+            return v3.mag();
+        }
+        // Otherwise, the nearest point on the segment is between
+        // `p0` and `p1`, so calculate the point-line distance
+        (v0 * v3).abs() / v0.mag()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -146,14 +211,14 @@ mod test {
 
     #[test]
     fn segment() {
-        let a = Line::new((0.0, 0.0), (10.0, 0.0));
-        assert_eq!(a.segment_distance((0.0, 5.0)), 5.0);
-        assert_eq!(a.segment_distance((5.0, 5.0)), 5.0);
-        assert_eq!(a.segment_distance((10.0, 5.0)), 5.0);
-        assert_eq!(a.segment_distance((-5.0, 0.0)), 5.0);
-        assert_eq!(a.segment_distance((15.0, 0.0)), 5.0);
-        assert_eq!(a.segment_distance((0.0, -5.0)), 5.0);
-        assert_eq!(a.segment_distance((5.0, -5.0)), 5.0);
-        assert_eq!(a.segment_distance((10.0, -5.0)), 5.0);
+        let a = Seg::new((0.0, 0.0), (10.0, 0.0));
+        assert_eq!(a.distance((0.0, 5.0)), 5.0);
+        assert_eq!(a.distance((5.0, 5.0)), 5.0);
+        assert_eq!(a.distance((10.0, 5.0)), 5.0);
+        assert_eq!(a.distance((-5.0, 0.0)), 5.0);
+        assert_eq!(a.distance((15.0, 0.0)), 5.0);
+        assert_eq!(a.distance((0.0, -5.0)), 5.0);
+        assert_eq!(a.distance((5.0, -5.0)), 5.0);
+        assert_eq!(a.distance((10.0, -5.0)), 5.0);
     }
 }

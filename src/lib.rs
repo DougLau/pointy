@@ -14,6 +14,6 @@ mod transform;
 
 pub use bbox::{BBox, BBoxIter, Bounded};
 pub use float::Float;
-pub use line::Line;
+pub use line::{Line, Seg};
 pub use point::Pt;
 pub use transform::Transform;
