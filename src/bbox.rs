@@ -291,6 +291,8 @@ mod test {
         assert!(!p.bounded_by(BBox::new([(1.0, 1.0), (2.0, 2.0)])));
         assert!(!p.bounded_by(BBox::new([(1.1, 1.0), (2.0, 2.0)])));
         assert!(!p.bounded_by(BBox::new([(0.0, 10.0), (100.0, 200.0)])));
+        let p = Pt::from((1.0, 1.1));
+        assert!(!p.bounded_by(BBox::new([(0.0, 0.0), (1.0, 1.0)])));
     }
 
     #[test]

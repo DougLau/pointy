@@ -2,6 +2,7 @@
 //
 // Copyright (c) 2020-2022  Douglas P Lau
 //
+use crate::bbox::{BBox, Bounded};
 use crate::float::Float;
 use crate::point::Pt;
 #[cfg(feature = "serde")]
@@ -107,6 +108,65 @@ where
     }
 }
 
+/// Position relative to bounding box
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum Bounds {
+    Before,
+    Within,
+    After,
+}
+
+impl Bounds {
+    fn check<F>(v: F, mn: F, mx: F) -> Self
+    where
+        F: Float,
+    {
+        if v < mn {
+            Bounds::Before
+        } else if v > mx {
+            Bounds::After
+        } else {
+            Bounds::Within
+        }
+    }
+}
+
+impl<F> Bounded<F> for Seg<F>
+where
+    F: Float,
+{
+    fn bounded_by(self, bbox: BBox<F>) -> bool {
+        let xmn = bbox.x_min();
+        let xmx = bbox.x_max();
+        let ymn = bbox.y_min();
+        let ymx = bbox.y_max();
+        let x0 = Bounds::check(self.p0.x, xmn, xmx);
+        let y0 = Bounds::check(self.p0.y, ymn, ymx);
+        let x1 = Bounds::check(self.p1.x, xmn, xmx);
+        let y1 = Bounds::check(self.p1.y, ymn, ymx);
+        match (x0, y0, x1, y1) {
+            (Bounds::Before, _, Bounds::Before, _) => false,
+            (Bounds::After, _, Bounds::After, _) => false,
+            (_, Bounds::Before, _, Bounds::Before) => false,
+            (_, Bounds::After, _, Bounds::After) => false,
+            (Bounds::Within, Bounds::Within, _, _) => true,
+            (_, _, Bounds::Within, Bounds::Within) => true,
+            (Bounds::Before, _, _, _) | (_, _, Bounds::Before, _) => {
+                // "left" edge of bounding box
+                self.intersects(Seg::new((xmn, ymn), (xmn, ymx)))
+            }
+            (Bounds::After, _, _, _) | (_, _, Bounds::After, _) => {
+                // "right" edge of bounding box
+                self.intersects(Seg::new((xmx, ymn), (xmx, ymx)))
+            }
+            (_, Bounds::Before, _, _) | (_, _, _, Bounds::Before) => {
+                // "bottom" edge of bounding box
+                self.intersects(Seg::new((xmn, ymn), (xmx, ymn)))
+            }
+        }
+    }
+}
+
 impl<F> Seg<F>
 where
     F: Float,
@@ -147,6 +207,19 @@ where
         // `p0` and `p1`, so calculate the point-line distance
         (v0 * v3).abs() / v0.mag()
     }
+
+    /// Check if segment intersects with another segment
+    pub fn intersects(self, rhs: Self) -> bool {
+        let l0 = Line::new(self.p0, self.p1);
+        let l1 = Line::new(rhs.p0, rhs.p1);
+        match l0.intersection(l1) {
+            Some(p) => {
+                let bbox = BBox::new([rhs.p0, rhs.p1]);
+                p.bounded_by(bbox)
+            }
+            None => false,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -185,7 +258,7 @@ mod test {
     }
 
     #[test]
-    fn segment() {
+    fn seg_dist() {
         let a = Seg::new((0.0, 0.0), (10.0, 0.0));
         assert_eq!(a.distance((0.0, 5.0)), 5.0);
         assert_eq!(a.distance((5.0, 5.0)), 5.0);
@@ -195,5 +268,19 @@ mod test {
         assert_eq!(a.distance((0.0, -5.0)), 5.0);
         assert_eq!(a.distance((5.0, -5.0)), 5.0);
         assert_eq!(a.distance((10.0, -5.0)), 5.0);
+    }
+
+    #[test]
+    fn seg_bounded() {
+        let b = BBox::new([(0.0, 0.0), (1.0, 1.0)]);
+        assert!(Seg::new((0.0, 0.0), (1.0, 1.0)).bounded_by(b));
+        assert!(Seg::new((1.0, 1.0), (2.0, 2.0)).bounded_by(b));
+        assert!(Seg::new((0.0, 0.0), (-1.0, -1.0)).bounded_by(b));
+        assert!(!Seg::new((2.0, 2.0), (3.0, 3.0)).bounded_by(b));
+        assert!(!Seg::new((-1.0, -1.0), (-2.0, -2.0)).bounded_by(b));
+        assert!(Seg::new((0.5, 0.5), (1.5, 0.5)).bounded_by(b));
+        assert!(Seg::new((0.5, 0.5), (0.5, 1.5)).bounded_by(b));
+        assert!(Seg::new((0.5, 1.5), (1.5, 0.5)).bounded_by(b));
+        assert!(!Seg::new((0.5, 1.6), (1.6, 0.5)).bounded_by(b));
     }
 }
