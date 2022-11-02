@@ -221,6 +221,18 @@ where
     }
 }
 
+impl<F> Bounded<F> for Pt<F>
+where
+    F: Float,
+{
+    fn bounded_by(self, bbox: BBox<F>) -> bool {
+        self.x() <= bbox.x_max()
+            && self.x() >= bbox.x_min()
+            && self.y() <= bbox.y_max()
+            && self.y() >= bbox.y_min()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -260,7 +272,7 @@ mod test {
     }
 
     #[test]
-    fn bounded_by() {
+    fn box_bounded_by() {
         let a = BBox::new([(0.0, 0.0), (1.0, 1.0)]);
         assert!(a.bounded_by(BBox::new([(0.0, 0.0), (5.0, 5.0)])));
         assert!(a.bounded_by(BBox::new([(-1.0, -1.0), (0.0, 0.0)])));
@@ -268,6 +280,17 @@ mod test {
         assert!(a.bounded_by(BBox::new([(1.0, 1.0), (2.0, 2.0)])));
         assert!(!a.bounded_by(BBox::new([(1.1, 1.0), (2.0, 2.0)])));
         assert!(!a.bounded_by(BBox::new([(0.0, 10.0), (100.0, 200.0)])));
+    }
+
+    #[test]
+    fn pt_bounded_by() {
+        let p = Pt::from((0.0, 0.0));
+        assert!(p.bounded_by(BBox::new([(0.0, 0.0), (5.0, 5.0)])));
+        assert!(p.bounded_by(BBox::new([(-1.0, -1.0), (0.0, 0.0)])));
+        assert!(!p.bounded_by(BBox::new([(0.0, 0.5), (1.0, 1.0)])));
+        assert!(!p.bounded_by(BBox::new([(1.0, 1.0), (2.0, 2.0)])));
+        assert!(!p.bounded_by(BBox::new([(1.1, 1.0), (2.0, 2.0)])));
+        assert!(!p.bounded_by(BBox::new([(0.0, 10.0), (100.0, 200.0)])));
     }
 
     #[test]
