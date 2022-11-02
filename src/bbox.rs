@@ -182,7 +182,7 @@ where
 
     /// Get the minimum X value
     pub fn x_min(self) -> F {
-        self.pts[0].x()
+        self.pts[0].x
     }
 
     /// Get the middle X value
@@ -192,12 +192,12 @@ where
 
     /// Get the maximum X value
     pub fn x_max(self) -> F {
-        self.pts[1].x()
+        self.pts[1].x
     }
 
     /// Get the minimum Y value
     pub fn y_min(self) -> F {
-        self.pts[0].y()
+        self.pts[0].y
     }
 
     /// Get the middle Y value
@@ -207,7 +207,7 @@ where
 
     /// Get the maximum Y value
     pub fn y_max(self) -> F {
-        self.pts[1].y()
+        self.pts[1].y
     }
 
     /// Get the X span
@@ -226,10 +226,10 @@ where
     F: Float,
 {
     fn bounded_by(self, bbox: BBox<F>) -> bool {
-        self.x() <= bbox.x_max()
-            && self.x() >= bbox.x_min()
-            && self.y() <= bbox.y_max()
-            && self.y() >= bbox.y_min()
+        self.x <= bbox.x_max()
+            && self.x >= bbox.x_min()
+            && self.y <= bbox.y_max()
+            && self.y >= bbox.y_min()
     }
 }
 

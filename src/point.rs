@@ -21,8 +21,11 @@ pub struct Pt<F>
 where
     F: Float,
 {
-    x: F,
-    y: F,
+    /// X coordinate
+    pub x: F,
+
+    /// Y coordinate
+    pub y: F,
 }
 
 impl<F> From<&Pt<F>> for Pt<F>
@@ -199,16 +202,6 @@ where
         }
     }
 
-    /// Get the X value
-    pub fn x(self) -> F {
-        self.x
-    }
-
-    /// Get the Y value
-    pub fn y(self) -> F {
-        self.y
-    }
-
     /// Create a point with minimum component values of two points
     pub fn with_min<P: Into<Self>>(self, rhs: P) -> Self {
         let rhs = rhs.into();
@@ -283,8 +276,8 @@ where
     /// Get right-hand perpendicular vector
     pub fn right(self) -> Self {
         Self {
-            x: self.y(),
-            y: -self.x(),
+            x: self.y,
+            y: -self.x,
         }
     }
 
@@ -318,8 +311,8 @@ where
 impl From<Pt<f32>> for Pt<f64> {
     fn from(pt: Pt<f32>) -> Self {
         Self {
-            x: pt.x().into(),
-            y: pt.y().into(),
+            x: pt.x.into(),
+            y: pt.y.into(),
         }
     }
 }
@@ -358,16 +351,16 @@ mod test {
         assert_eq!(c.angle_rel((1.0, 1.0)), 1.5707963f32);
         assert_eq!(Pt::new(-1.0f32, -1.0).angle_rel(c), 1.5707965);
         let v = Pt::from(0.0f32);
-        assert_approx_eq!(v.x(), 1.0);
-        assert_approx_eq!(v.y(), 0.0);
+        assert_approx_eq!(v.x, 1.0);
+        assert_approx_eq!(v.y, 0.0);
         let v = Pt::from_angle(std::f32::consts::PI / 2.0);
-        assert_approx_eq!(v.x(), 0.0);
-        assert_approx_eq!(v.y(), 1.0);
+        assert_approx_eq!(v.x, 0.0);
+        assert_approx_eq!(v.y, 1.0);
         let v = Pt::from_angle(std::f32::consts::PI);
-        assert_approx_eq!(v.x(), -1.0);
-        assert_approx_eq!(v.y(), 0.0);
+        assert_approx_eq!(v.x, -1.0);
+        assert_approx_eq!(v.y, 0.0);
         let v = Pt::from_angle(std::f32::consts::PI * 1.5);
-        assert_approx_eq!(v.x(), 0.0);
-        assert_approx_eq!(v.y(), -1.0);
+        assert_approx_eq!(v.x, 0.0);
+        assert_approx_eq!(v.y, -1.0);
     }
 }
