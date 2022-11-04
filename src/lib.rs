@@ -11,7 +11,7 @@ mod line;
 mod point;
 mod transform;
 
-pub use bbox::{BBox, BBoxIter, Bounded};
+pub use bbox::{BBox, BBoxIter, Bounded, Bounds};
 pub use float::Float;
 pub use line::{Line, Seg};
 pub use point::Pt;

@@ -16,6 +16,17 @@ where
     fn bounded_by(self, bbox: BBox<F>) -> bool;
 }
 
+/// Position relative to bounding box
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Bounds {
+    /// Position before (less than) a bound
+    Before,
+    /// Position within a bound
+    Within,
+    /// Position after (greater than) a bound
+    After,
+}
+
 /// Axis-aligned bounding box
 ///
 /// # Example
@@ -219,6 +230,28 @@ where
     pub fn y_span(self) -> F {
         self.y_max() - self.y_min()
     }
+
+    /// Check X bounds
+    pub fn check_x(self, x: F) -> Bounds {
+        if x < self.x_min() {
+            Bounds::Before
+        } else if x > self.x_max() {
+            Bounds::After
+        } else {
+            Bounds::Within
+        }
+    }
+
+    /// Check Y bounds
+    pub fn check_y(self, y: F) -> Bounds {
+        if y < self.y_min() {
+            Bounds::Before
+        } else if y > self.y_max() {
+            Bounds::After
+        } else {
+            Bounds::Within
+        }
+    }
 }
 
 impl<F> Bounded<F> for Pt<F>
@@ -226,10 +259,8 @@ where
     F: Float,
 {
     fn bounded_by(self, bbox: BBox<F>) -> bool {
-        self.x <= bbox.x_max()
-            && self.x >= bbox.x_min()
-            && self.y <= bbox.y_max()
-            && self.y >= bbox.y_min()
+        bbox.check_x(self.x) == Bounds::Within
+            && bbox.check_y(self.y) == Bounds::Within
     }
 }
 

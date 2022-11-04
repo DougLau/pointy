@@ -2,7 +2,7 @@
 //
 // Copyright (c) 2020-2022  Douglas P Lau
 //
-use crate::bbox::{BBox, Bounded};
+use crate::bbox::{BBox, Bounded, Bounds};
 use crate::float::Float;
 use crate::point::Pt;
 #[cfg(feature = "serde")]
@@ -108,29 +108,6 @@ where
     }
 }
 
-/// Position relative to bounding box
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-enum Bounds {
-    Before,
-    Within,
-    After,
-}
-
-impl Bounds {
-    fn check<F>(v: F, mn: F, mx: F) -> Self
-    where
-        F: Float,
-    {
-        if v < mn {
-            Bounds::Before
-        } else if v > mx {
-            Bounds::After
-        } else {
-            Bounds::Within
-        }
-    }
-}
-
 impl<F> Bounded<F> for Seg<F>
 where
     F: Float,
@@ -140,10 +117,10 @@ where
         let xmx = bbox.x_max();
         let ymn = bbox.y_min();
         let ymx = bbox.y_max();
-        let x0 = Bounds::check(self.p0.x, xmn, xmx);
-        let y0 = Bounds::check(self.p0.y, ymn, ymx);
-        let x1 = Bounds::check(self.p1.x, xmn, xmx);
-        let y1 = Bounds::check(self.p1.y, ymn, ymx);
+        let x0 = bbox.check_x(self.p0.x);
+        let y0 = bbox.check_y(self.p0.y);
+        let x1 = bbox.check_x(self.p1.x);
+        let y1 = bbox.check_y(self.p1.y);
         match (x0, y0, x1, y1) {
             (Bounds::Before, _, Bounds::Before, _) => false,
             (Bounds::After, _, Bounds::After, _) => false,
