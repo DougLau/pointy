@@ -117,28 +117,49 @@ where
         let xmx = bbox.x_max();
         let ymn = bbox.y_min();
         let ymx = bbox.y_max();
-        let x0 = bbox.check_x(self.p0.x);
-        let y0 = bbox.check_y(self.p0.y);
-        let x1 = bbox.check_x(self.p1.x);
-        let y1 = bbox.check_y(self.p1.y);
-        match (x0, y0, x1, y1) {
-            (Bounds::Before, _, Bounds::Before, _) => false,
-            (Bounds::After, _, Bounds::After, _) => false,
-            (_, Bounds::Before, _, Bounds::Before) => false,
-            (_, Bounds::After, _, Bounds::After) => false,
-            (Bounds::Within, Bounds::Within, _, _) => true,
-            (_, _, Bounds::Within, Bounds::Within) => true,
-            (Bounds::Before, _, _, _) | (_, _, Bounds::Before, _) => {
+        let p0 = bbox.check(self.p0.x, self.p0.y);
+        let p1 = bbox.check(self.p1.x, self.p1.y);
+        match (p0, p1) {
+            (Bounds::Within, _) | (_, Bounds::Within) => true,
+            // points opposite horizontally
+            (Bounds::Left | Bounds::Right, Bounds::Left | Bounds::Right) => {
+                false
+            }
+            // points opposite vertically
+            (Bounds::Below | Bounds::Above, Bounds::Below | Bounds::Above) => {
+                false
+            }
+            // both points on left side
+            (
+                Bounds::Left | Bounds::BelowLeft | Bounds::AboveLeft,
+                Bounds::Left | Bounds::BelowLeft | Bounds::AboveLeft,
+            ) => false,
+            // both points on right side
+            (
+                Bounds::Right | Bounds::BelowRight | Bounds::AboveRight,
+                Bounds::Right | Bounds::BelowRight | Bounds::AboveRight,
+            ) => false,
+            // both points below box
+            (
+                Bounds::Below | Bounds::BelowLeft | Bounds::BelowRight,
+                Bounds::Below | Bounds::BelowLeft | Bounds::BelowRight,
+            ) => false,
+            // both points above box
+            (
+                Bounds::Above | Bounds::AboveLeft | Bounds::AboveRight,
+                Bounds::Above | Bounds::AboveLeft | Bounds::AboveRight,
+            ) => false,
+            // either point on left side
+            (Bounds::Left | Bounds::BelowLeft | Bounds::AboveLeft, _)
+            | (_, Bounds::Left | Bounds::BelowLeft | Bounds::AboveLeft) => {
                 // "left" edge of bounding box
                 self.intersects(Seg::new((xmn, ymn), (xmn, ymx)))
             }
-            (Bounds::After, _, _, _) | (_, _, Bounds::After, _) => {
+            // either point on right side
+            (Bounds::Right | Bounds::BelowRight | Bounds::AboveRight, _)
+            | (_, Bounds::Right | Bounds::BelowRight | Bounds::AboveRight) => {
                 // "right" edge of bounding box
                 self.intersects(Seg::new((xmx, ymn), (xmx, ymx)))
-            }
-            (_, Bounds::Before, _, _) | (_, _, _, Bounds::Before) => {
-                // "bottom" edge of bounding box
-                self.intersects(Seg::new((xmn, ymn), (xmx, ymn)))
             }
         }
     }

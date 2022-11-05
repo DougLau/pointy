@@ -6,6 +6,7 @@ use crate::float::Float;
 use crate::point::Pt;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
 
 /// Trait for comparing a shape with a bounding box
 pub trait Bounded<F>
@@ -19,12 +20,24 @@ where
 /// Position relative to bounding box
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Bounds {
-    /// Position before (less than) a bound
-    Before,
-    /// Position within a bound
+    /// Within box
     Within,
-    /// Position after (greater than) a bound
-    After,
+    /// Below box
+    Below,
+    /// Below and left of box
+    BelowLeft,
+    /// Left of box
+    Left,
+    /// Above and left of box
+    AboveLeft,
+    /// Above box
+    Above,
+    /// Above and right of box
+    AboveRight,
+    /// Right of box
+    Right,
+    /// Below and right of box
+    BelowRight,
 }
 
 /// Axis-aligned bounding box
@@ -231,25 +244,32 @@ where
         self.y_max() - self.y_min()
     }
 
-    /// Check X bounds
-    pub fn check_x(self, x: F) -> Bounds {
-        if x < self.x_min() {
-            Bounds::Before
+    /// Check bounds
+    pub fn check(self, x: F, y: F) -> Bounds {
+        let x = if x < self.x_min() {
+            Ordering::Less
         } else if x > self.x_max() {
-            Bounds::After
+            Ordering::Greater
         } else {
-            Bounds::Within
-        }
-    }
-
-    /// Check Y bounds
-    pub fn check_y(self, y: F) -> Bounds {
-        if y < self.y_min() {
-            Bounds::Before
+            Ordering::Equal
+        };
+        let y = if y < self.y_min() {
+            Ordering::Less
         } else if y > self.y_max() {
-            Bounds::After
+            Ordering::Greater
         } else {
-            Bounds::Within
+            Ordering::Equal
+        };
+        match (x, y) {
+            (Ordering::Equal, Ordering::Equal) => Bounds::Within,
+            (Ordering::Less, Ordering::Less) => Bounds::BelowLeft,
+            (Ordering::Less, Ordering::Equal) => Bounds::Left,
+            (Ordering::Less, Ordering::Greater) => Bounds::AboveLeft,
+            (Ordering::Equal, Ordering::Greater) => Bounds::Above,
+            (Ordering::Greater, Ordering::Greater) => Bounds::AboveRight,
+            (Ordering::Greater, Ordering::Equal) => Bounds::Right,
+            (Ordering::Greater, Ordering::Less) => Bounds::BelowRight,
+            (Ordering::Equal, Ordering::Less) => Bounds::Below,
         }
     }
 }
@@ -259,8 +279,7 @@ where
     F: Float,
 {
     fn bounded_by(self, bbox: BBox<F>) -> bool {
-        bbox.check_x(self.x) == Bounds::Within
-            && bbox.check_y(self.y) == Bounds::Within
+        bbox.check(self.x, self.y) == Bounds::Within
     }
 }
 
