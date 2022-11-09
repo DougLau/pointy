@@ -210,13 +210,9 @@ where
     pub fn intersects(self, rhs: Self) -> bool {
         let l0 = Line::new(self.p0, self.p1);
         let l1 = Line::new(rhs.p0, rhs.p1);
-        match l0.intersection(l1) {
-            Some(p) => {
-                let bbox = BBox::new([rhs.p0, rhs.p1]);
-                p.bounded_by(bbox)
-            }
-            None => false,
-        }
+        l0.intersection(l1)
+            .filter(|p| p.bounded_by(BBox::new([rhs.p0, rhs.p1])))
+            .is_some()
     }
 }
 
