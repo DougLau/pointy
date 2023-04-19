@@ -1,6 +1,6 @@
 // point.rs     2D Points
 //
-// Copyright (c) 2020-2022  Douglas P Lau
+// Copyright (c) 2020-2023  Douglas P Lau
 //
 use crate::float::Float;
 #[cfg(feature = "serde")]
@@ -235,15 +235,14 @@ where
 
     /// Get distance squared to another point
     pub fn dist_sq<P: Into<Self>>(self, rhs: P) -> F {
-        let rhs = rhs.into();
-        let dx = self.x - rhs.x;
-        let dy = self.y - rhs.y;
-        dx * dx + dy * dy
+        let v = self - rhs.into();
+        v.x * v.x + v.y * v.y
     }
 
     /// Get distance to another point
     pub fn dist<P: Into<Self>>(self, rhs: P) -> F {
-        self.dist_sq(rhs.into()).sqrt()
+        // TODO: rename to distance to match line module
+        (self - rhs.into()).mag()
     }
 
     /// Get the midpoint from this to another point
