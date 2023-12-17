@@ -234,14 +234,13 @@ where
     }
 
     /// Get distance squared to another point
-    pub fn dist_sq<P: Into<Self>>(self, rhs: P) -> F {
+    pub fn distance_sq<P: Into<Self>>(self, rhs: P) -> F {
         let v = self - rhs.into();
         v.x * v.x + v.y * v.y
     }
 
     /// Get distance to another point
-    pub fn dist<P: Into<Self>>(self, rhs: P) -> F {
-        // TODO: rename to distance to match line module
+    pub fn distance<P: Into<Self>>(self, rhs: P) -> F {
         (self - rhs.into()).mag()
     }
 
@@ -332,8 +331,8 @@ mod test {
         assert_eq!(-a, Pt::new(-2.0, -1.0));
         assert_eq!(b.mag(), 5.0);
         assert_eq!(a.normalize(), Pt::new(0.8944272, 0.4472136));
-        assert_eq!(a.dist_sq(b), 10.0);
-        assert_eq!(b.dist((0.0, 0.0)), 5.0);
+        assert_eq!(a.distance_sq(b), 10.0);
+        assert_eq!(b.distance((0.0, 0.0)), 5.0);
         assert_eq!(a.midpoint(b), Pt::new(2.5, 2.5));
         assert_eq!(a.left(), Pt::new(-1.0, 2.0));
         assert_eq!(a.right(), Pt::new(1.0, -2.0));
