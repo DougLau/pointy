@@ -1,6 +1,6 @@
 // bbox.rs      Bounding boxes
 //
-// Copyright (c) 2020-2022  Douglas P Lau
+// Copyright (c) 2020-2024  Douglas P Lau
 //
 use crate::float::Float;
 use crate::point::Pt;
@@ -113,6 +113,7 @@ where
     F: Float,
 {
     fn default() -> Self {
+        // min > max results in no valid bounds
         let minp = Pt::new(F::max_value(), F::max_value());
         let maxp = Pt::new(F::min_value(), F::min_value());
         let pts = [minp, maxp];
