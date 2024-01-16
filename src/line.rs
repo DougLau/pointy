@@ -208,13 +208,17 @@ where
         (v0 * v3).abs() / v0.mag()
     }
 
-    /// Check if segment intersects with another segment
-    pub fn intersects(self, rhs: Self) -> bool {
+    /// Get the point where two segments intersect
+    pub fn intersection(self, rhs: Self) -> Option<Pt<F>> {
         let l0 = Line::new(self.p0, self.p1);
         let l1 = Line::new(rhs.p0, rhs.p1);
         l0.intersection(l1)
             .filter(|p| p.bounded_by(BBox::new([rhs.p0, rhs.p1])))
-            .is_some()
+    }
+
+    /// Check if segment intersects with another segment
+    pub fn intersects(self, rhs: Self) -> bool {
+        self.intersection(rhs).is_some()
     }
 }
 
@@ -264,6 +268,18 @@ mod test {
         assert_eq!(a.distance((0.0, -5.0)), 5.0);
         assert_eq!(a.distance((5.0, -5.0)), 5.0);
         assert_eq!(a.distance((10.0, -5.0)), 5.0);
+    }
+
+    #[test]
+    fn seg_intersection() {
+        let a = Seg::new((0.0, 0.0), (1.0, 0.0));
+        assert_eq!(a.intersection(a), None);
+        let b = Seg::new((1.0, 1.0), (1.0, 0.0));
+        assert_eq!(a.intersection(b), Some(Pt::new(1.0, 0.0)));
+        let c = Seg::new((0.5, 1.0), (0.5, 10.0));
+        assert_eq!(a.intersection(c), None);
+        let d = Seg::new((0.5, 1.0), (0.5, -1.0));
+        assert_eq!(a.intersection(d), Some(Pt::new(0.5, 0.0)));
     }
 
     #[test]
