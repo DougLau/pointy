@@ -123,45 +123,43 @@ where
             // both opposite vertically
             (Bounds::Below, Bounds::Above) => true,
             (Bounds::Above, Bounds::Below) => true,
-            // both on left side
             (
                 Bounds::Left | Bounds::BelowLeft | Bounds::AboveLeft,
                 Bounds::Left | Bounds::BelowLeft | Bounds::AboveLeft,
             ) => false,
-            // both on right side
             (
                 Bounds::Right | Bounds::BelowRight | Bounds::AboveRight,
                 Bounds::Right | Bounds::BelowRight | Bounds::AboveRight,
             ) => false,
-            // both below box
             (
                 Bounds::Below | Bounds::BelowLeft | Bounds::BelowRight,
                 Bounds::Below | Bounds::BelowLeft | Bounds::BelowRight,
             ) => false,
-            // both above box
             (
                 Bounds::Above | Bounds::AboveLeft | Bounds::AboveRight,
                 Bounds::Above | Bounds::AboveLeft | Bounds::AboveRight,
             ) => false,
-            // either point on left side
-            (Bounds::Left | Bounds::BelowLeft | Bounds::AboveLeft, _)
-            | (_, Bounds::Left | Bounds::BelowLeft | Bounds::AboveLeft) => {
-                let xmn = bbox.x_min();
-                // "left" edge of bounding box
-                self.intersects(Seg::new(
-                    (xmn, bbox.y_min()),
-                    (xmn, bbox.y_max()),
-                ))
+            (Bounds::Left, _) | (_, Bounds::Left) => {
+                self.intersects(bbox.x_min_edge())
             }
-            // either point on right side
-            (Bounds::Right | Bounds::BelowRight | Bounds::AboveRight, _)
-            | (_, Bounds::Right | Bounds::BelowRight | Bounds::AboveRight) => {
-                let xmx = bbox.x_max();
-                // "right" edge of bounding box
-                self.intersects(Seg::new(
-                    (xmx, bbox.y_min()),
-                    (xmx, bbox.y_max()),
-                ))
+            (Bounds::Right, _) | (_, Bounds::Right) => {
+                self.intersects(bbox.x_max_edge())
+            }
+            (Bounds::BelowLeft, _) | (_, Bounds::BelowLeft) => {
+                self.intersects(bbox.x_min_edge())
+                    || self.intersects(bbox.y_min_edge())
+            }
+            (Bounds::AboveLeft, _) | (_, Bounds::AboveLeft) => {
+                self.intersects(bbox.x_min_edge())
+                    || self.intersects(bbox.y_max_edge())
+            }
+            (Bounds::BelowRight, _) | (_, Bounds::BelowRight) => {
+                self.intersects(bbox.x_max_edge())
+                    || self.intersects(bbox.y_min_edge())
+            }
+            (Bounds::AboveRight, _) | (_, Bounds::AboveRight) => {
+                self.intersects(bbox.x_max_edge())
+                    || self.intersects(bbox.y_max_edge())
             }
         }
     }
@@ -219,6 +217,75 @@ where
     /// Check if segment intersects with another segment
     pub fn intersects(self, rhs: Self) -> bool {
         self.intersection(rhs).is_some()
+    }
+
+    /// Clip segment with a bounding box
+    pub fn clip(mut self, bbox: BBox<F>) -> Option<Self> {
+        if !self.bounded_by(bbox) {
+            return None;
+        }
+        if let Some(p) = self.intersection(bbox.x_min_edge()) {
+            let xmn = bbox.x_min();
+            if self.p0.x < xmn && self.p1.x > xmn {
+                self.p0 = p;
+            } else if self.p1.x < xmn && self.p0.x > xmn {
+                self.p1 = p;
+            }
+        }
+        if let Some(p) = self.intersection(bbox.x_max_edge()) {
+            let xmx = bbox.x_max();
+            if self.p0.x > xmx && self.p1.x < xmx {
+                self.p0 = p;
+            } else if self.p1.x > xmx && self.p0.x < xmx {
+                self.p1 = p;
+            }
+        }
+        if let Some(p) = self.intersection(bbox.y_min_edge()) {
+            let ymn = bbox.y_min();
+            if self.p0.y < ymn && self.p1.y > ymn {
+                self.p0 = p;
+            } else if self.p1.y < ymn && self.p0.y > ymn {
+                self.p1 = p;
+            }
+        }
+        if let Some(p) = self.intersection(bbox.y_max_edge()) {
+            let ymx = bbox.y_max();
+            if self.p0.y > ymx && self.p1.y < ymx {
+                self.p0 = p;
+            } else if self.p1.y > ymx && self.p0.y < ymx {
+                self.p1 = p;
+            }
+        }
+        Some(self)
+    }
+}
+
+impl<F> BBox<F>
+where
+    F: Float,
+{
+    /// Get edge on X min side
+    fn x_min_edge(self) -> Seg<F> {
+        let xmn = self.x_min();
+        Seg::new((xmn, self.y_min()), (xmn, self.y_max()))
+    }
+
+    /// Get edge on X max side
+    fn x_max_edge(self) -> Seg<F> {
+        let xmx = self.x_max();
+        Seg::new((xmx, self.y_min()), (xmx, self.y_max()))
+    }
+
+    /// Get edge on Y min side
+    fn y_min_edge(self) -> Seg<F> {
+        let ymn = self.y_min();
+        Seg::new((self.x_min(), ymn), (self.x_max(), ymn))
+    }
+
+    /// Get edge on Y max side
+    fn y_max_edge(self) -> Seg<F> {
+        let ymx = self.y_max();
+        Seg::new((self.x_min(), ymx), (self.x_max(), ymx))
     }
 }
 
