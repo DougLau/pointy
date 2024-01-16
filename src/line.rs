@@ -1,6 +1,6 @@
 // line.rs      2D Lines
 //
-// Copyright (c) 2020-2022  Douglas P Lau
+// Copyright (c) 2020-2024  Douglas P Lau
 //
 use crate::bbox::{BBox, Bounded, Bounds};
 use crate::float::Float;
@@ -113,38 +113,32 @@ where
     F: Float,
 {
     fn bounded_by(self, bbox: BBox<F>) -> bool {
-        let xmn = bbox.x_min();
-        let xmx = bbox.x_max();
-        let ymn = bbox.y_min();
-        let ymx = bbox.y_max();
         let p0 = bbox.check(self.p0.x, self.p0.y);
         let p1 = bbox.check(self.p1.x, self.p1.y);
         match (p0, p1) {
             (Bounds::Within, _) | (_, Bounds::Within) => true,
-            // points opposite horizontally
-            (Bounds::Left | Bounds::Right, Bounds::Left | Bounds::Right) => {
-                false
-            }
-            // points opposite vertically
-            (Bounds::Below | Bounds::Above, Bounds::Below | Bounds::Above) => {
-                false
-            }
-            // both points on left side
+            // both opposite horizontally
+            (Bounds::Left, Bounds::Right) => true,
+            (Bounds::Right, Bounds::Left) => true,
+            // both opposite vertically
+            (Bounds::Below, Bounds::Above) => true,
+            (Bounds::Above, Bounds::Below) => true,
+            // both on left side
             (
                 Bounds::Left | Bounds::BelowLeft | Bounds::AboveLeft,
                 Bounds::Left | Bounds::BelowLeft | Bounds::AboveLeft,
             ) => false,
-            // both points on right side
+            // both on right side
             (
                 Bounds::Right | Bounds::BelowRight | Bounds::AboveRight,
                 Bounds::Right | Bounds::BelowRight | Bounds::AboveRight,
             ) => false,
-            // both points below box
+            // both below box
             (
                 Bounds::Below | Bounds::BelowLeft | Bounds::BelowRight,
                 Bounds::Below | Bounds::BelowLeft | Bounds::BelowRight,
             ) => false,
-            // both points above box
+            // both above box
             (
                 Bounds::Above | Bounds::AboveLeft | Bounds::AboveRight,
                 Bounds::Above | Bounds::AboveLeft | Bounds::AboveRight,
@@ -152,14 +146,22 @@ where
             // either point on left side
             (Bounds::Left | Bounds::BelowLeft | Bounds::AboveLeft, _)
             | (_, Bounds::Left | Bounds::BelowLeft | Bounds::AboveLeft) => {
+                let xmn = bbox.x_min();
                 // "left" edge of bounding box
-                self.intersects(Seg::new((xmn, ymn), (xmn, ymx)))
+                self.intersects(Seg::new(
+                    (xmn, bbox.y_min()),
+                    (xmn, bbox.y_max()),
+                ))
             }
             // either point on right side
             (Bounds::Right | Bounds::BelowRight | Bounds::AboveRight, _)
             | (_, Bounds::Right | Bounds::BelowRight | Bounds::AboveRight) => {
+                let xmx = bbox.x_max();
                 // "right" edge of bounding box
-                self.intersects(Seg::new((xmx, ymn), (xmx, ymx)))
+                self.intersects(Seg::new(
+                    (xmx, bbox.y_min()),
+                    (xmx, bbox.y_max()),
+                ))
             }
         }
     }
@@ -276,5 +278,7 @@ mod test {
         assert!(Seg::new((0.5, 0.5), (0.5, 1.5)).bounded_by(b));
         assert!(Seg::new((0.5, 1.5), (1.5, 0.5)).bounded_by(b));
         assert!(!Seg::new((0.5, 1.6), (1.6, 0.5)).bounded_by(b));
+        assert!(Seg::new((-0.5, 0.5), (1.5, 0.5)).bounded_by(b));
+        assert!(Seg::new((0.5, -0.5), (0.5, 1.5)).bounded_by(b));
     }
 }
