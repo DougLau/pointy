@@ -226,33 +226,33 @@ where
         }
         if let Some(p) = self.intersection(bbox.x_min_edge()) {
             let xmn = bbox.x_min();
-            if self.p0.x < xmn && self.p1.x > xmn {
+            if self.p0.x < xmn {
                 self.p0 = p;
-            } else if self.p1.x < xmn && self.p0.x > xmn {
+            } else if self.p1.x < xmn {
                 self.p1 = p;
             }
         }
         if let Some(p) = self.intersection(bbox.x_max_edge()) {
             let xmx = bbox.x_max();
-            if self.p0.x > xmx && self.p1.x < xmx {
+            if self.p0.x > xmx {
                 self.p0 = p;
-            } else if self.p1.x > xmx && self.p0.x < xmx {
+            } else if self.p1.x > xmx {
                 self.p1 = p;
             }
         }
         if let Some(p) = self.intersection(bbox.y_min_edge()) {
             let ymn = bbox.y_min();
-            if self.p0.y < ymn && self.p1.y > ymn {
+            if self.p0.y < ymn {
                 self.p0 = p;
-            } else if self.p1.y < ymn && self.p0.y > ymn {
+            } else if self.p1.y < ymn {
                 self.p1 = p;
             }
         }
         if let Some(p) = self.intersection(bbox.y_max_edge()) {
             let ymx = bbox.y_max();
-            if self.p0.y > ymx && self.p1.y < ymx {
+            if self.p0.y > ymx {
                 self.p0 = p;
-            } else if self.p1.y > ymx && self.p0.y < ymx {
+            } else if self.p1.y > ymx {
                 self.p1 = p;
             }
         }
