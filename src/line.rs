@@ -1,6 +1,6 @@
 // line.rs      2D Lines
 //
-// Copyright (c) 2020-2024  Douglas P Lau
+// Copyright (c) 2020-2025  Douglas P Lau
 //
 use crate::bbox::{BBox, Bounded, Bounds};
 use crate::float::Float;
@@ -8,7 +8,7 @@ use crate::point::Pt;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// A line
+/// Line of infinite length
 ///
 /// ```rust
 /// use pointy::Line;
@@ -22,13 +22,13 @@ where
     F: Float,
 {
     /// First point
-    pub p0: Pt<F>,
+    p0: Pt<F>,
 
     /// Second point
-    pub p1: Pt<F>,
+    p1: Pt<F>,
 }
 
-/// A line segment
+/// Segment of a line between two endpoints
 ///
 /// ```rust
 /// use pointy::Seg;
@@ -41,10 +41,10 @@ pub struct Seg<F>
 where
     F: Float,
 {
-    /// First point
+    /// First endpoint
     pub p0: Pt<F>,
 
-    /// Second point
+    /// Second endpoint
     pub p1: Pt<F>,
 }
 
