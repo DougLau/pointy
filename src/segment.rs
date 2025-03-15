@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// let seg = Seg::new((10.0, 15.0), (0.0, 2.0));
 /// ```
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Seg<F>
 where
