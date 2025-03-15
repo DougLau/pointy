@@ -1,6 +1,6 @@
 // bbox.rs      Bounding boxes
 //
-// Copyright (c) 2020-2024  Douglas P Lau
+// Copyright (c) 2020-2025  Douglas P Lau
 //
 use crate::float::Float;
 use crate::point::Pt;
@@ -17,7 +17,8 @@ where
     fn bounded_by(self, bbox: BBox<F>) -> bool;
 }
 
-/// Position relative to bounding box
+/// Position relative to bounding box, used by [Bounded](trait.Bounded.html)
+/// trait
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Bounds {
     /// Within box

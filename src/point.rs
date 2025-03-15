@@ -1,6 +1,6 @@
 // point.rs     2D Points
 //
-// Copyright (c) 2020-2023  Douglas P Lau
+// Copyright (c) 2020-2025  Douglas P Lau
 //
 use crate::float::Float;
 #[cfg(feature = "serde")]
@@ -52,16 +52,6 @@ where
 {
     fn from(pt: [F; 2]) -> Self {
         Self { x: pt[0], y: pt[1] }
-    }
-}
-
-impl<F> From<F> for Pt<F>
-where
-    F: Float,
-{
-    /// Create a unit vector from an angle (radians)
-    fn from(angle: F) -> Self {
-        Self::from_angle(angle)
     }
 }
 
@@ -348,7 +338,7 @@ mod test {
         assert_eq!(a.angle_rel(b), -0.4636476);
         assert_eq!(c.angle_rel((1.0, 1.0)), 1.5707963f32);
         assert_eq!(Pt::new(-1.0f32, -1.0).angle_rel(c), 1.5707965);
-        let v = Pt::from(0.0f32);
+        let v = Pt::from_angle(0.0f32);
         assert_approx_eq!(v.x, 1.0);
         assert_approx_eq!(v.y, 0.0);
         let v = Pt::from_angle(std::f32::consts::PI / 2.0);
