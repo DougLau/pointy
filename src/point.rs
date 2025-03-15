@@ -8,12 +8,14 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-/// 2-dimensional point / vector
+/// 2-dimensional point or vector
 ///
 /// ```rust
 /// use pointy::Pt;
 ///
-/// let pt = Pt::new(10.0, 15.0);
+/// let a = Pt::new(10.0, 15.0);
+/// let b = Pt::from((5.2, 8.5));
+/// let c = Pt::from([37.1, 25.0]);
 /// ```
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
