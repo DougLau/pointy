@@ -8,7 +8,7 @@ homepage = "https://github.com/DougLau/pointy"
 repository = "https://github.com/DougLau/pointy"
 readme = "README.md"
 keywords = ["geometry", "2D"]
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 num-traits = "0.2"
