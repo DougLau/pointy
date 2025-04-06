@@ -2,11 +2,12 @@
 name = "pointy"
 version = "0.7.0"
 description = "Minimal 2D geometry library"
-license = "MIT/Apache-2.0"
+license = "MIT OR Apache-2.0"
 documentation = "https://docs.rs/pointy"
 homepage = "https://github.com/DougLau/pointy"
 repository = "https://github.com/DougLau/pointy"
 readme = "README.md"
+categories = ["graphics", "mathematics"]
 keywords = ["geometry", "2D"]
 edition = "2024"
 
