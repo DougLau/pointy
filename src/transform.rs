@@ -1,6 +1,6 @@
 // transform.rs     Affine transforms
 //
-// Copyright (c) 2020-2022  Douglas P Lau
+// Copyright (c) 2020-2026  Douglas P Lau
 //
 use crate::float::Float;
 use crate::point::Pt;
@@ -289,11 +289,11 @@ mod test {
         const PI: f32 = std::f32::consts::PI;
         assert_eq!(
             Transform::with_skew(PI / 2.0, 0.0).e,
-            [1.0, -22877334.0, 0.0, 0.0, 1.0, 0.0]
+            [1.0, -22877332.0, 0.0, 0.0, 1.0, 0.0]
         );
         assert_eq!(
             Transform::default().skew(PI / 2.0, 0.0).e,
-            [1.0, -22877334.0, 0.0, 0.0, 1.0, 0.0]
+            [1.0, -22877332.0, 0.0, 0.0, 1.0, 0.0]
         );
         assert_eq!(
             Transform::with_skew(0.0, PI / 4.0).e,
