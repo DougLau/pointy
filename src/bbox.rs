@@ -1,6 +1,6 @@
 // bbox.rs      Bounding boxes
 //
-// Copyright (c) 2020-2025  Douglas P Lau
+// Copyright (c) 2020-2026  Douglas P Lau
 //
 use crate::float::Float;
 use crate::point::Pt;
@@ -196,6 +196,7 @@ where
         pts.into_iter().for_each(|p| self.include_pt(p));
     }
 
+    /// Include a point in bounding box
     fn include_pt<P>(&mut self, p: P)
     where
         P: Into<Pt<F>>,
@@ -204,6 +205,17 @@ where
         let minp = self.pts[0].with_min(p);
         let maxp = self.pts[1].with_max(p);
         self.pts = [minp, maxp];
+    }
+
+    /// Clamp a point to the bounding box
+    pub fn clamp<P>(&self, p: P) -> Pt<F>
+    where
+        P: Into<Pt<F>>,
+    {
+        let p = p.into();
+        let x = p.x.clamp(self.x_min(), self.x_max());
+        let y = p.y.clamp(self.y_min(), self.y_max());
+        Pt::new(x, y)
     }
 
     /// Get the minimum X value
@@ -365,5 +377,17 @@ mod test {
         assert_eq!(a.y_min(), 0.0);
         assert_eq!(a.y_max(), 0.0);
         assert_eq!(a.y_span(), 0.0);
+    }
+
+    #[test]
+    fn box_clamp() {
+        let bbox = BBox::new([(0.0, 0.0), (5.0, 5.0)]);
+        assert_eq!(Pt::new(0.0, 0.0), bbox.clamp(Pt::new(0.0, 0.0)));
+        assert_eq!(Pt::new(0.0, 0.0), bbox.clamp(Pt::new(-5.0, 0.0)));
+        assert_eq!(Pt::new(0.0, 0.0), bbox.clamp(Pt::new(0.0, -5.0)));
+        assert_eq!(Pt::new(5.0, 0.0), bbox.clamp(Pt::new(10.0, 0.0)));
+        assert_eq!(Pt::new(0.0, 5.0), bbox.clamp(Pt::new(0.0, 10.0)));
+        assert_eq!(Pt::new(5.0, 5.0), bbox.clamp(Pt::new(10.0, 10.0)));
+        assert_eq!(Pt::new(2.0, 5.0), bbox.clamp(Pt::new(2.0, 10.0)));
     }
 }
